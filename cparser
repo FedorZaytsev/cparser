@@ -1,0 +1,14 @@
+import sys
+import lexer
+
+
+
+def main():
+    f = open(sys.argv[1], "r")
+
+    l = lexer.Lexer(f.read())
+    
+
+
+if __name__ == "__main__":
+    main()

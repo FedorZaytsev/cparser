@@ -1,0 +1,639 @@
+/* based on http://www.quut.com/c/ANSI-C-grammar-y.html */
+%token	IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL FUNC_NAME SIZEOF
+%token	PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
+%token	AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
+%token	SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
+%token	XOR_ASSIGN OR_ASSIGN
+%token	TYPEDEF_NAME ENUMERATION_CONSTANT
+%token	TYPEDEF EXTERN STATIC AUTO REGISTER INLINE
+%token	CONST RESTRICT VOLATILE
+%token	BOOL CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE VOID
+%token	COMPLEX IMAGINARY
+%token	STRUCT UNION ENUM ELLIPSIS
+%token	CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+%token	ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
+
+/*pseudo tokens*/
+%token  COMMENT NEWLINE SPACE
+
+abstract_declarator
+    : pointer, direct_abstract_declarator
+    | pointer
+    | direct_abstract_declarator
+    ;
+
+additive_expression
+    : multiplicative_expression, additive_expression_lr
+    ;
+
+additive_expression_lr
+    : '+', multiplicative_expression, additive_expression_lr
+    | '-', multiplicative_expression, additive_expression_lr
+    | E
+    ;
+
+alignment_specifier
+    : ALIGNAS, '(', type_name, ')'
+    | ALIGNAS, '(', constant_expression, ')'
+    ;
+
+and_expression
+    : equality_expression, and_expression_lr
+    ;
+
+and_expression_lr
+    : '&', equality_expression, and_expression_lr
+    | E
+    ;
+
+argument_expression_list
+    : assignment_expression, argument_expression_list_lr
+    ;
+
+argument_expression_list_lr
+    : ',', assignment_expression, argument_expression_list_lr
+    | E
+    ;
+
+assignment_expression
+    : conditional_expression
+    | unary_expression, assignment_operator, assignment_expression
+    ;
+
+assignment_operator
+    : '='
+    | MUL_ASSIGN
+    | DIV_ASSIGN
+    | MOD_ASSIGN
+    | ADD_ASSIGN
+    | SUB_ASSIGN
+    | LEFT_ASSIGN
+    | RIGHT_ASSIGN
+    | AND_ASSIGN
+    | XOR_ASSIGN
+    | OR_ASSIGN
+    ;
+
+atomic_type_specifier
+    : ATOMIC, '(', type_name, ')'
+    ;
+
+block_item
+    : declaration
+    | statement
+    ;
+
+block_item_list
+    : block_item, block_item_list_lr
+    ;
+
+block_item_list_lr
+    : block_item, block_item_list_lr
+    | E
+    ;
+
+cast_expression
+    : unary_expression
+    | '(', type_name, ')', cast_expression
+    ;
+
+compound_statement
+    : '{', '}'
+    | '{', block_item_list, '}'
+    ;
+
+conditional_expression
+    : logical_or_expression
+    | logical_or_expression, '?', expression, ':', conditional_expression
+    ;
+
+constant
+    : I_CONSTANT
+    | F_CONSTANT
+    | ENUMERATION_CONSTANT
+    ;
+
+constant_expression
+    : conditional_expression
+    ;
+
+declaration
+    : declaration_specifiers, ';'
+    | declaration_specifiers, init_declarator_list, ';'
+    | static_assert_declaration
+    ;
+
+declaration_list
+    : declaration, declaration_list_lr
+    ;
+
+declaration_list_lr
+    : declaration, declaration_list_lr
+    | E
+    ;
+
+declaration_specifiers
+    : storage_class_specifier, declaration_specifiers
+    | storage_class_specifier
+    | type_specifier, declaration_specifiers
+    | type_specifier
+    | type_qualifier, declaration_specifiers
+    | type_qualifier
+    | function_specifier, declaration_specifiers
+    | function_specifier
+    | alignment_specifier, declaration_specifiers
+    | alignment_specifier
+    ;
+
+declarator
+    : pointer, direct_declarator
+    | direct_declarator
+    ;
+
+designation
+    : designator_list, '='
+    ;
+
+designator
+    : '[', constant_expression, ']'
+    | '.', IDENTIFIER
+    ;
+
+designator_list
+    : designator, designator_list_lr
+    ;
+
+designator_list_lr
+    : designator, designator_list_lr
+    | E
+    ;
+
+direct_abstract_declarator
+    : '(', abstract_declarator, ')', direct_abstract_declarator_lr
+    | '[', ']', direct_abstract_declarator_lr
+    | '[', '*', ']', direct_abstract_declarator_lr
+    | '[', STATIC, type_qualifier_list, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', STATIC, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', type_qualifier_list, STATIC, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', type_qualifier_list, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', type_qualifier_list, ']', direct_abstract_declarator_lr
+    | '[', assignment_expression, ']', direct_abstract_declarator_lr
+    | '(', ')', direct_abstract_declarator_lr
+    | '(', parameter_type_list, ')', direct_abstract_declarator_lr
+    ;
+
+direct_abstract_declarator_lr
+    : '[', ']', direct_abstract_declarator_lr
+    | '[', '*', ']', direct_abstract_declarator_lr
+    | '[', STATIC, type_qualifier_list, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', STATIC, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', type_qualifier_list, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', type_qualifier_list, STATIC, assignment_expression, ']', direct_abstract_declarator_lr
+    | '[', type_qualifier_list, ']', direct_abstract_declarator_lr
+    | '[', assignment_expression, ']', direct_abstract_declarator_lr
+    | '(', ')', direct_abstract_declarator_lr
+    | '(', parameter_type_list, ')', direct_abstract_declarator_lr
+    | E
+    ;
+
+direct_declarator
+    : IDENTIFIER, direct_declarator_lr
+    | '(', declarator, ')', direct_declarator_lr
+    ;
+
+direct_declarator_lr
+    : '[', ']', direct_declarator_lr
+    | '[', '*', ']', direct_declarator_lr
+    | '[', STATIC, type_qualifier_list, assignment_expression, ']', direct_declarator_lr
+    | '[', STATIC, assignment_expression, ']', direct_declarator_lr
+    | '[', type_qualifier_list, '*', ']', direct_declarator_lr
+    | '[', type_qualifier_list, STATIC, assignment_expression, ']', direct_declarator_lr
+    | '[', type_qualifier_list, assignment_expression, ']', direct_declarator_lr
+    | '[', type_qualifier_list, ']', direct_declarator_lr
+    | '[', assignment_expression, ']', direct_declarator_lr
+    | '(', parameter_type_list, ')', direct_declarator_lr
+    | '(', ')', direct_declarator_lr
+    | '(', identifier_list, ')', direct_declarator_lr
+    | E
+    ;
+
+enum_specifier
+    : ENUM, '{', enumerator_list, '}'
+    | ENUM, '{', enumerator_list, ',', '}'
+    | ENUM, IDENTIFIER, '{', enumerator_list, '}'
+    | ENUM, IDENTIFIER, '{', enumerator_list, ',', '}'
+    | ENUM, IDENTIFIER
+    ;
+
+enumeration_constant
+    : IDENTIFIER
+    ;
+
+enumerator
+    : enumeration_constant, '=', constant_expression
+    | enumeration_constant
+    ;
+
+enumerator_list
+    : enumerator, enumerator_list_lr
+    ;
+
+enumerator_list_lr
+    : ',', enumerator, enumerator_list_lr
+    | E
+    ;
+
+equality_expression
+    : relational_expression, equality_expression_lr
+    ;
+
+equality_expression_lr
+    : EQ_OP, relational_expression, equality_expression_lr
+    | NE_OP, relational_expression, equality_expression_lr
+    | E
+    ;
+
+exclusive_or_expression
+    : and_expression, exclusive_or_expression_lr
+    ;
+
+exclusive_or_expression_lr
+    : '^', and_expression, exclusive_or_expression_lr
+    | E
+    ;
+
+expression
+    : assignment_expression, expression_lr
+    ;
+
+expression_lr
+    : ',', assignment_expression, expression_lr
+    | E
+    ;
+
+expression_statement
+    : ';'
+    | expression, ';'
+    ;
+
+external_declaration
+    : function_definition
+    | declaration
+    ;
+
+function_definition
+    : declaration_specifiers, declarator, declaration_list, compound_statement
+    | declaration_specifiers, declarator, compound_statement
+    ;
+
+#tested
+function_specifier
+    : INLINE
+    | NORETURN
+    ;
+
+generic_assoc_list
+    : generic_association, generic_assoc_list_lr
+    ;
+
+generic_assoc_list_lr
+    : ',', generic_association, generic_assoc_list_lr
+    | E
+    ;
+
+generic_association
+    : type_name, ':', assignment_expression
+    | DEFAULT, ':', assignment_expression
+    ;
+
+generic_selection
+    : GENERIC, '(', assignment_expression, ',', generic_assoc_list, ')'
+    ;
+
+identifier_list
+    : IDENTIFIER, identifier_list_lr
+    ;
+
+identifier_list_lr
+    : ',', IDENTIFIER, identifier_list_lr
+    | E
+    ;
+
+inclusive_or_expression
+    : exclusive_or_expression, inclusive_or_expression_lr
+    ;
+
+inclusive_or_expression_lr
+    : '|', exclusive_or_expression, inclusive_or_expression_lr
+    | E
+    ;
+
+init_declarator
+    : declarator, '=', initializer
+    | declarator
+    ;
+
+init_declarator_list
+    : init_declarator, init_declarator_list_lr
+    ;
+
+init_declarator_list_lr
+    : ',', init_declarator, init_declarator_list_lr
+    | E
+    ;
+
+initializer
+    : '{', initializer_list, '}'
+    | '{', initializer_list, ',', '}'
+    | assignment_expression
+    ;
+
+initializer_list
+    : designation, initializer, initializer_list_lr
+    | initializer, initializer_list_lr
+    ;
+
+initializer_list_lr
+    : ',', designation, initializer, initializer_list_lr
+    | ',', initializer, initializer_list_lr
+    | E
+    ;
+
+iteration_statement
+    : WHILE, '(', expression, ')', statement
+    | DO, statement, WHILE, '(', expression, ')', ';'
+    | FOR, '(', expression_statement, expression_statement, ')', statement
+    | FOR, '(', expression_statement, expression_statement, expression, ')', statement
+    | FOR, '(', declaration, expression_statement, ')', statement
+    | FOR, '(', declaration, expression_statement, expression, ')', statement
+    ;
+
+jump_statement
+    : GOTO, IDENTIFIER, ';'
+    | CONTINUE, ';'
+    | BREAK, ';'
+    | RETURN, ';'
+    | RETURN, expression, ';'
+    ;
+
+labeled_statement
+    : IDENTIFIER, ':', statement
+    | CASE, constant_expression, ':', statement
+    | DEFAULT, ':', statement
+    ;
+
+logical_and_expression
+    : inclusive_or_expression, logical_and_expression_lr
+    ;
+
+logical_and_expression_lr
+    : AND_OP, inclusive_or_expression, logical_and_expression_lr
+    | E
+    ;
+
+logical_or_expression
+    : logical_and_expression, logical_or_expression_lr
+    ;
+
+logical_or_expression_lr
+    : OR_OP, logical_and_expression, logical_or_expression_lr
+    | E
+    ;
+
+multiplicative_expression
+    : cast_expression, multiplicative_expression_lr
+    ;
+
+multiplicative_expression_lr
+    : '*', cast_expression, multiplicative_expression_lr
+    | '/', cast_expression, multiplicative_expression_lr
+    | '%', cast_expression, multiplicative_expression_lr
+    | E
+    ;
+
+parameter_declaration
+    : declaration_specifiers, declarator
+    | declaration_specifiers, abstract_declarator
+    | declaration_specifiers
+    ;
+
+parameter_list
+    : parameter_declaration, parameter_list_lr
+    ;
+
+parameter_list_lr
+    : ',', parameter_declaration, parameter_list_lr
+    | E
+    ;
+
+parameter_type_list
+    : parameter_list, ',', ELLIPSIS
+    | parameter_list
+    ;
+
+pointer
+    : '*', type_qualifier_list, pointer
+    | '*', type_qualifier_list
+    | '*', pointer
+    | '*'
+    ;
+
+postfix_expression
+    : primary_expression, postfix_expression_lr
+    | '(', type_name, ')', '{', initializer_list, '}', postfix_expression_lr
+    | '(', type_name, ')', '{', initializer_list, ',', '}', postfix_expression_lr
+    ;
+
+postfix_expression_lr
+    : '[', expression, ']', postfix_expression_lr
+    | '(', ')', postfix_expression_lr
+    | '(', argument_expression_list, ')', postfix_expression_lr
+    | '.', IDENTIFIER, postfix_expression_lr
+    | PTR_OP, IDENTIFIER, postfix_expression_lr
+    | INC_OP, postfix_expression_lr
+    | DEC_OP, postfix_expression_lr
+    | E
+    ;
+
+primary_expression
+    : IDENTIFIER
+    | constant
+    | string
+    | '(', expression, ')'
+    | generic_selection
+    ;
+
+relational_expression
+    : shift_expression, relational_expression_lr
+    ;
+
+relational_expression_lr
+    : '<', shift_expression, relational_expression_lr
+    | '>', shift_expression, relational_expression_lr
+    | LE_OP, shift_expression, relational_expression_lr
+    | GE_OP, shift_expression, relational_expression_lr
+    | E
+    ;
+
+selection_statement
+    : IF, '(', expression, ')', statement, ELSE, statement
+    | IF, '(', expression, ')', statement
+    | SWITCH, '(', expression, ')', statement
+    ;
+
+shift_expression
+    : additive_expression, shift_expression_lr
+    ;
+
+shift_expression_lr
+    : LEFT_OP, additive_expression, shift_expression_lr
+    | RIGHT_OP, additive_expression, shift_expression_lr
+    | E
+    ;
+
+specifier_qualifier_list
+    : type_specifier, specifier_qualifier_list
+    | type_specifier
+    | type_qualifier, specifier_qualifier_list
+    | type_qualifier
+    ;
+
+statement
+    : labeled_statement
+    | compound_statement
+    | expression_statement
+    | selection_statement
+    | iteration_statement
+    | jump_statement
+    ;
+
+static_assert_declaration
+    : STATIC_ASSERT, '(', constant_expression, ',', STRING_LITERAL, ')', ';'
+    ;
+
+//tested
+storage_class_specifier
+    : TYPEDEF
+    | EXTERN
+    | STATIC
+    | THREAD_LOCAL
+    | AUTO
+    | REGISTER
+    ;
+
+string
+    : STRING_LITERAL
+    | FUNC_NAME
+    ;
+
+struct_declaration
+    : specifier_qualifier_list, ';'
+    | specifier_qualifier_list, struct_declarator_list, ';'
+    | static_assert_declaration
+    ;
+
+struct_declaration_list
+    : struct_declaration, struct_declaration_list_lr
+    ;
+
+struct_declaration_list_lr
+    : struct_declaration, struct_declaration_list_lr
+    | E
+    ;
+
+struct_declarator
+    : ':', constant_expression
+    | declarator, ':', constant_expression
+    | declarator
+    ;
+
+struct_declarator_list
+    : struct_declarator, struct_declarator_list_lr
+    ;
+
+struct_declarator_list_lr
+    : ',', struct_declarator, struct_declarator_list_lr
+    | E
+    ;
+
+struct_or_union
+    : STRUCT
+    | UNION
+    ;
+
+struct_or_union_specifier
+    : struct_or_union, '{', struct_declaration_list, '}'
+    | struct_or_union, IDENTIFIER, '{', struct_declaration_list, '}'
+    | struct_or_union, IDENTIFIER
+    ;
+
+translation_unit
+    : external_declaration, translation_unit_lr
+    ;
+
+translation_unit_lr
+    : external_declaration, translation_unit_lr
+    | E
+    ;
+
+type_name
+    : specifier_qualifier_list, abstract_declarator
+    | specifier_qualifier_list
+    ;
+
+#tested
+type_qualifier
+    : CONST
+    | RESTRICT
+    | VOLATILE
+    | ATOMIC
+    ;
+
+#tested
+type_qualifier_list
+    : type_qualifier, type_qualifier_list_lr
+    ;
+
+type_qualifier_list_lr
+    : type_qualifier, type_qualifier_list_lr
+    | E
+    ;
+
+type_specifier
+    : VOID
+    | CHAR
+    | SHORT
+    | INT
+    | LONG
+    | FLOAT
+    | DOUBLE
+    | SIGNED
+    | UNSIGNED
+    | BOOL
+    | COMPLEX
+    | IMAGINARY
+    | atomic_type_specifier
+    | struct_or_union_specifier
+    | enum_specifier
+    | TYPEDEF_NAME
+    ;
+
+unary_expression
+    : postfix_expression
+    | INC_OP, unary_expression
+    | DEC_OP, unary_expression
+    | unary_operator, cast_expression
+    | SIZEOF, unary_expression
+    | SIZEOF, '(', type_name, ')'
+    | ALIGNOF, '(', type_name, ')'
+    ;
+
+unary_operator
+    : '&'
+    | '*'
+    | '+'
+    | '-'
+    | '~'
+    | '!'
+    ;
+
