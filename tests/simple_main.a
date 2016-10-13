@@ -1,0 +1,46 @@
+{
+    "childs": [
+        {
+            "childs": [
+                {
+                    "childs": [
+                        {
+                            "childs": [
+                                {
+                                    "childs": [
+                                        "INT"
+                                    ],
+                                    "name": "type_specifier"
+                                }
+                            ],
+                            "name": "declaration_specifiers"
+                        },
+                        {
+                            "childs": [
+                                {
+                                    "childs": [
+                                        "IDENTIFIER",
+                                        "(",
+                                        ")"
+                                    ],
+                                    "name": "direct_declarator"
+                                }
+                            ],
+                            "name": "declarator"
+                        },
+                        {
+                            "childs": [
+                                "{",
+                                "}"
+                            ],
+                            "name": "compound_statement"
+                        }
+                    ],
+                    "name": "function_definition"
+                }
+            ],
+            "name": "external_declaration"
+        }
+    ],
+    "name": "translation_unit"
+}

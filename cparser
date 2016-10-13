@@ -1,12 +1,26 @@
-import sys
 import lexer
+import analyzer
+import argparse
+import debug
 
 
 
 def main():
-    f = open(sys.argv[1], "r")
+
+    parser = argparse.ArgumentParser(description='C language parser')
+    parser.add_argument('input', help='input file')
+    args = parser.parse_args()
+
+    f = open(args.input, "r")
 
     l = lexer.Lexer(f.read())
+
+    a = analyzer.Analyzer(l)
+
+    res = a.parse()
+    debug.printNodeWithSkip(res)
+    #print(debug.Node2Json(res))
+
     
 
 

@@ -63,7 +63,7 @@ class Lexem:
         return self.type
 
     def __str__(self):
-        return "Lexem({}, {})".format(self.representation, self.type)
+        return "Lexem('{}', {})".format(self.representation, self.type)
 
 
 class Lexer:
@@ -169,10 +169,10 @@ class Lexer:
     }
 
     def __init__(self, data):
-        assert(type(data) is str)
+        assert (type(data) is str)
         self.data = data
         self.ptr = Position(data, 0, 1, 1)
-        self.current_lexem_id = 0
+        self.current_lexem_id = -1
         self.LEXEM = None
         self.lst = []
         self.states = []
@@ -181,16 +181,16 @@ class Lexer:
             if self.parsePreprocessor(): continue
             if self.parseWhitespace(): continue
             if self.parseComment(): continue
+            if self.parseOperators(): continue
             if self.parseIdent(): continue
             if self.parseInt(): continue
             if self.parseFloat(): continue
             if self.parseString(): continue
-            if self.parseOperators(): continue
 
             print("Unknown token '{}'".format(self.ptr.getStringForDebug()))
             raise Exception("Unknown token")
 
-    #[0-7]
+    # [0-7]
     def parseO(self, ptr):
         ch = ptr.getChar()
         if ch in '01234567':
@@ -198,7 +198,7 @@ class Lexer:
             return True
         return False
 
-    #[0-9]
+    # [0-9]
     def parseD(self, ptr):
         ch = ptr.getChar()
         if ch.isdigit():
@@ -206,7 +206,7 @@ class Lexer:
             return True
         return False
 
-    #[a-zA-Z_]
+    # [a-zA-Z_]
     def parseL(self, ptr):
         ch = ptr.getChar()
         if ch.isalpha() or ch == '_':
@@ -214,18 +214,18 @@ class Lexer:
             return True
         return False
 
-    #[a-zA-Z_0-9]
+    # [a-zA-Z_0-9]
     def parseA(self, ptr):
         return self.parseD(ptr) or self.parseL(ptr)
 
-    #(0[xX])
+    # (0[xX])
     def parseHP(self, ptr):
         if ptr.match("0x") or ptr.match("0X"):
             ptr.inc(2)
             return True
         return False
 
-    #[a-fA-F0-9]
+    # [a-fA-F0-9]
     def parseH(self, ptr):
         ch = ptr.getChar()
         if ch.isdigit() or ch.lower() in 'abcdef':
@@ -233,7 +233,7 @@ class Lexer:
             return True
         return False
 
-    #(((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))
+    # (((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))
     def parseIS(self, ptr):
         def parseuU(ptr):
             if ptr.getChar() in 'uU':
@@ -244,6 +244,9 @@ class Lexer:
         def parselLllLL(ptr):
             if ptr.match('ll') or ptr.match('LL'):
                 ptr.next(2)
+                return True
+            if ptr.getChar() in 'lL':
+                ptr.next()
                 return True
             return False
 
@@ -262,7 +265,7 @@ class Lexer:
             return True
         return False
 
-    #[1-9]
+    # [1-9]
     def parseNZ(self, ptr):
         ch = ptr.getChar()
         if ch.isdigit() and ch != '0':
@@ -270,7 +273,7 @@ class Lexer:
             return True
         return False
 
-    #([Ee][+-]?{D}+)
+    # ([Ee][+-]?{D}+)
     def parseE(self, ptr):
         end = copy.copy(ptr)
         if end.getChar().lower() != 'e':
@@ -282,28 +285,28 @@ class Lexer:
         if not end.getChar().isdigit():
             return False
 
-        #skip [Ee]
+        # skip [Ee]
         ptr.next()
         if ptr.getChar() == '+' or ptr.getChar() == '-':
             ptr.next()
         self.parseOneOrMore(self.parseD, ptr)
         return True
 
-    #(u|U|L)
+    # (u|U|L)
     def parseCP(self, ptr):
         if ptr.getChar() in 'uUL':
             ptr.next()
             return True
         return False
 
-    #(f|F|l|L)
+    # (f|F|l|L)
     def parseFS(self, ptr):
         if ptr.getChar().lower() == 'f' or ptr.getChar().lower() == 'l':
             ptr.next()
             return True
         return False
 
-    #([Pp][+-]?{D}+)
+    # ([Pp][+-]?{D}+)
     def parseP(self, ptr):
         if ptr.getChar().lower() != 'p':
             return False
@@ -312,7 +315,7 @@ class Lexer:
             ptr.next()
         return self.parseOneOrMore(self.parseD, ptr)
 
-    #(u8|u|U|L)
+    # (u8|u|U|L)
     def parseSP(self, ptr):
         if ptr.match('u8'):
             ptr.inc(2)
@@ -322,25 +325,25 @@ class Lexer:
             return True
         return False
 
-    #{A}*
+    # {A}*
     def parseRec(self, f, ptr):
         while f(ptr):
             pass
         return True
 
-    #{A}?
+    # {A}?
     def parseProb(self, f, ptr):
         f(ptr)
         return True
 
-    #{A}+
+    # {A}+
     def parseOneOrMore(self, f, ptr):
         if not f(ptr):
             return False
         return self.parseRec(f, ptr)
 
-    #{L}{A}*
-    #IDENTIFIER
+    # {L}{A}*
+    # IDENTIFIER
     def parseIdent(self):
         end = copy.copy(self.ptr)
         if not self.parseL(end):
@@ -355,7 +358,7 @@ class Lexer:
             self.pushLexem("IDENTIFIER", rep)
         return True
 
-    #I_CONSTANT
+    # I_CONSTANT
     def parseInt(self):
 
         parsers = [self.parseInt1, self.parseInt2, self.parseInt3, self.parseInt4]
@@ -368,8 +371,8 @@ class Lexer:
 
         return False
 
-    #{HP}{H}+{IS}?
-    #I_CONSTANT
+    # {HP}{H}+{IS}?
+    # I_CONSTANT
     def parseInt1(self, end):
         if not self.parseHP(end):
             return False
@@ -379,9 +382,8 @@ class Lexer:
 
         return True
 
-
-    #{NZ}{D}*{IS}?
-    #I_CONSTANT
+    # {NZ}{D}*{IS}?
+    # I_CONSTANT
     def parseInt2(self, end):
         if not self.parseNZ(end):
             return False
@@ -391,8 +393,8 @@ class Lexer:
 
         return True
 
-    #"0"{O}*{IS}?
-    #I_CONSTANT
+    # "0"{O}*{IS}?
+    # I_CONSTANT
     def parseInt3(self, end):
         if end.getChar() != '0':
             return False
@@ -401,10 +403,10 @@ class Lexer:
 
         return True
 
-    #CP?'(\\.|[^\\'])+'
-    #I_CONSTANT
-    #regexp changed becouse of too much complexity
-    #this regexp can accept char constants with errors, but who cares?
+    # CP?'(\\.|[^\\'])+'
+    # I_CONSTANT
+    # regexp changed becouse of too much complexity
+    # this regexp can accept char constants with errors, but who cares?
     def parseInt4(self, end):
         self.parseProb(self.parseCP, end)
         if end.getChar() != '\'':
@@ -416,7 +418,8 @@ class Lexer:
         return True
 
     def parseFloat(self):
-        parsers = [self.parseFloat1, self.parseFloat2, self.parseFloat3, self.parseFloat4, self.parseFloat5, self.parseFloat6]
+        parsers = [self.parseFloat1, self.parseFloat2, self.parseFloat3, self.parseFloat4, self.parseFloat5,
+                   self.parseFloat6]
         for f in parsers:
             end = copy.copy(self.ptr)
             if f(end):
@@ -425,8 +428,8 @@ class Lexer:
 
         return False
 
-    #{D}+{E}{FS}?
-    #F_CONSTANT
+    # {D}+{E}{FS}?
+    # F_CONSTANT
     def parseFloat1(self, ptr):
         if not self.parseOneOrMore(self.parseD, ptr):
             return False
@@ -437,8 +440,8 @@ class Lexer:
         self.parseProb(self.parseFS, ptr)
         return True
 
-    #{D}*"."{D}+{E}?{FS}?
-    #F_CONSTANT
+    # {D}*"."{D}+{E}?{FS}?
+    # F_CONSTANT
     def parseFloat2(self, ptr):
         self.parseRec(self.parseD, ptr)
         if not ptr.getChar == '.':
@@ -453,8 +456,8 @@ class Lexer:
 
         return True
 
-    #{D}+"."{E}?{FS}?
-    #F_CONSTANT
+    # {D}+"."{E}?{FS}?
+    # F_CONSTANT
     def parseFloat3(self, ptr):
         if not self.parseOneOrMore(self.parseD, ptr):
             return False
@@ -465,8 +468,8 @@ class Lexer:
         self.parseProb(self.parseFS, ptr)
         return True
 
-    #{HP}{H}+{P}{FS}?
-    #F_CONSTANT
+    # {HP}{H}+{P}{FS}?
+    # F_CONSTANT
     def parseFloat4(self, ptr):
         if not self.parseHP(ptr):
             return False
@@ -477,8 +480,8 @@ class Lexer:
         self.parseProb(self.parseFS, ptr)
         return True
 
-    #{HP}{H}*"."{H}+{P}{FS}?
-    #F_CONSTANT
+    # {HP}{H}*"."{H}+{P}{FS}?
+    # F_CONSTANT
     def parseFloat5(self, ptr):
         if not self.parseHP(ptr):
             return False
@@ -492,8 +495,8 @@ class Lexer:
         self.parseProb(self.parseFS, ptr)
         return True
 
-    #{HP}{H}+"."{P}{FS}?
-    #F_CONSTANT
+    # {HP}{H}+"."{P}{FS}?
+    # F_CONSTANT
     def parseFloat6(self, ptr):
         if not self.parseHP(ptr):
             return False
@@ -506,7 +509,6 @@ class Lexer:
             return False
         self.parseProb(self.parseFS, ptr)
         return True
-
 
     # L?\"(\\.|[^\\"])*\"
     def parseString(self):
@@ -526,7 +528,6 @@ class Lexer:
         self.pushLexem("STRING_LITERAL", self.ptr.getString(end))
         return True
 
-
     def parseComment(self):
         end = copy.copy(self.ptr)
         if end.match("//"):
@@ -544,7 +545,7 @@ class Lexer:
 
     def parsePreprocessor(self):
         end = copy.copy(self.ptr)
-        if end.getChar() == '#' and self.lst[-1].getType() == 'newline':
+        if end.getChar() == '#' and (len(self.lst) == 0 or (len(self.lst) > 0 and self.lst[-1].getType() == 'NEWLINE')):
             while True:
                 if end.match('\\\n'):
                     end.inc(2)
@@ -553,8 +554,7 @@ class Lexer:
                     self.ptr = end
                     return True
                 if end.getChar() == '\n':
-
-                    #CHECK THIS POINT
+                    # CHECK THIS POINT
                     end.next()
                     self.ptr = end
                     return True
@@ -572,29 +572,38 @@ class Lexer:
         return False
 
     def parseOperators(self):
+        bestk = ''
+        bestv = ''
         for k, v in self.operators.items():
             if self.ptr.match(k):
-                self.pushLexem(v, k)
-                return True
+                if len(k) > len(bestk):
+                    bestk = k
+                    bestv =v
+        if len(bestk) > 0:
+            self.pushLexem(bestv, bestk)
+            return True
         return False
 
     def pushLexem(self, name, representation):
-        print("Found lexem {} '{}' '{}'".format(self.ptr, name, representation))
+        #print("Found lexem {} '{}' '{}'".format(self.ptr, name, representation))
         self.ptr.inc(len(representation))
         self.lst.append(Lexem(self.ptr, representation, name))
         if self.LEXEM is None:
             self.LEXEM = self.lst[0]
 
-
     def get(self):
+        if self.current_lexem_id == -1:
+            self.next()
         if self.current_lexem_id >= len(self.lst):
             return Lexem(self.ptr, 'EOF', 'EOF')
         return self.lst[self.current_lexem_id]
 
     def next(self):
         self.current_lexem_id += 1
-        while self.current_lexem_id < len(self.lst) and (self.lst[self.current_lexem_id].getType() == "NEWLINE" or \
-                self.lst[self.current_lexem_id].getType() == "SPACE"):
+        while self.current_lexem_id < len(self.lst) and (self.lst[self.current_lexem_id].getType() == "NEWLINE" or
+                                                         self.lst[self.current_lexem_id].getType() == "SPACE" or
+                                                         self.lst[self.current_lexem_id].getType() == "COMMENT"
+                                                         ):
             self.current_lexem_id += 1
 
         if self.current_lexem_id < len(self.lst):
@@ -609,10 +618,30 @@ class Lexer:
         state = self.states[-1]
         self.current_lexem_id = state['ptr']
         if self.current_lexem_id < len(self.lst):
-            self.LEXEM = self.lst[self.current_lexem_id]
+            self.LEXEM = None
+            if self.current_lexem_id != -1:
+                self.LEXEM = self.lst[self.current_lexem_id]
         else:
             self.LEXEM = None
         self.removeSavedState()
 
     def removeSavedState(self):
         self.states = self.states[:-1]
+
+    def getComments(self):
+        lst = []
+        ptr = self.current_lexem_id + 1
+        while ptr < len(self.lst):
+            lexem = self.lst[ptr]
+            if lexem.getType() == 'SPACE' or lexem.getType() == 'NEWLINE':
+                ptr += 1
+                continue
+            if lexem.getType() == 'COMMENT':
+                lst.append(lexem)
+                ptr += 1
+                continue
+
+            break
+
+        return lst
+

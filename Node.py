@@ -36,24 +36,39 @@ class Node():
     def get(self, idx):
         return self.children[idx]
 
-    def append(self, el):
-        if type(el) is tuple and len(el) == 2 and type(el[1]) is bool:
-            if el[1]:
-                self.children.append(el[0])
-            return el[1]
+    def append(self, el, concate=False):
+        flag = True
+        comments = ()
+        value = None
+        if type(el) is tuple:
+            if type(el[0]) is tuple:
+                value = el[0][0]
+                comments = el[0][1]
+            else:
+                value = el[0]
+                if type(el[1]) is list:
+                    comments = el[1]
 
-        self.children.append(el)
+            if type(el[-1]) is bool:
+                flag = el[-1]
+        else:
+            value = el
+
+        if flag:
+            if value:
+                if concate:
+                    for e in value:
+                        self.children.append(e)
+                else:
+                    self.children.append(value)
+            for e in comments:
+                self.children.append(e)
+
+        return flag
 
     def concat(self, el):
-        if type(el) is tuple and len(el) == 2 and type(el[1]) is bool:
-            if el[1]:
-                for e in el[0]:
-                    self.children.append(e)
-            return el[1]
+        return self.append(el, True)
 
-        assert type(el) is Node
-        for e in el:
-            self.children.append(e)
 
     def skip(self, el):
         if type(el) is tuple and len(el) == 2 and type(el[1]) is bool:

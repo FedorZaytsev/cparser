@@ -15,13 +15,22 @@ class Analyzer:
         self.grammar = Cgrammar.CGrammar
 
     def parse(self):
-        self.parse_translation_unit()
+        return self.parse_translation_unit()
 
     def try2(self, func, args=[]):
         self.lexer.pushState()
         lnode = None
         try:
-            lnode = func(*args)
+            if type(func) is list:
+                assert len(args) == 0
+                lnode = []
+                for f in func:
+                    if type(f) is list:
+                        lnode.append(f[0](*f[1]))
+                    else:
+                        lnode.append(f())
+            else:
+                lnode = func(*args)
         except AnalyzerException:
             self.lexer.popState()
             return lnode, False
@@ -34,8 +43,9 @@ class Analyzer:
         lexem = self.lexer.get()
         for lex in arr:
             if lexem.getType() == lex:
+                comments = self.lexer.getComments()
                 self.lexer.next()
-                return lexem
+                return lexem, comments
 
         raise AnalyzerException(rule, "expected {} got {}".format(', '.join(arr), lexem))
 
@@ -46,14 +56,14 @@ class Analyzer:
         node = Node.create('translation_unit')
 
         node.append(self.parse_external_declaration())
-        node.append(self.parse_translation_unit_lr())
+        self.parse_translation_unit_lr(node)
 
         return node
 
-    def parse_translation_unit_lr(self):
-        node = Node.create('translation_unit_lr')
+    def parse_translation_unit_lr(self, node):
+
         if node.append(self.try2(self.parse_external_declaration)):
-            node.append(self.parse_translation_unit_lr())
+             self.parse_translation_unit_lr(node)
         return node
 
     def parse_external_declaration(self):
@@ -128,8 +138,8 @@ class Analyzer:
             return node
 
         # TODO change that to TYPEDEF_NAME
-        if node.append(self.try2(self.checkLexem, ['type_specifier', ['IDENTIFIER']])):
-            return node
+        #if node.append(self.try2(self.checkLexem, ['type_specifier', ['IDENTIFIER']])):
+        #    return node
 
         raise AnalyzerException('type_specifier',
                                 'expected {}, atomic_type, struct, union, enum or identifier got {}'.format(
@@ -395,11 +405,11 @@ class Analyzer:
     def parse_direct_declarator(self):
         node = Node.create('direct_declarator')
 
-        if node.append(self.try2(self.checkLexem('direct_declarator', ['IDENTIFIER']))):
+        if node.append(self.try2(self.checkLexem, ['direct_declarator', ['IDENTIFIER']])):
             self.parse_direct_declarator_lr(node)
             return node
 
-        if node.append(self.try2(self.checkLexem('direct_declarator', ['(']))):
+        if node.append(self.try2(self.checkLexem, ['direct_declarator', ['(']])):
             node.append(self.parse_declarator())
             node.append(self.checkLexem('direct_declarator', [')']))
             self.parse_direct_declarator_lr(node)
@@ -476,12 +486,11 @@ class Analyzer:
     def parse_assignment_expression(self):
         node = Node.create('assignment_expression')
 
-        if node.append(self.try2(self.parse_conditional_expression)):
+        if node.concat(self.try2([self.parse_unary_expression, self.parse_assignment_operator])):
+            node.append(self.parse_assignment_expression())
             return node
 
-        if node.append(self.try2(self.parse_unary_expression)):
-            node.append(self.parse_assignment_operator())
-            node.append(self.parse_assignment_expression())
+        if node.append(self.try2(self.parse_conditional_expression)):
             return node
 
         raise AnalyzerException('assignment_expression', '')
@@ -1279,7 +1288,7 @@ class Analyzer:
             node.append(self.checkLexem('jump_statement', [';']))
             return node
 
-        if node.append(self.try2(self.checkLexem, ['RETURN'])):
+        if node.append(self.try2(self.checkLexem, ['jump_statement', ['RETURN']])):
             node.append(self.try2(self.parse_expression))
             node.append(self.checkLexem('jump_statement', [';']))
             return node

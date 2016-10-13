@@ -1,5 +1,7 @@
-import lexer
 import analyzer
+import lexer
+import debug
+import json
 
 
 def process(source, func):
@@ -13,6 +15,13 @@ def catcherror(source, func):
         node = process(source, func)
     except analyzer.AnalyzerException as e:
         pass
+
+
+def processFile(filename):
+    with open(filename) as f:
+        node = process(f.read(), 'parse')
+        with open(filename + '.a') as testf:
+            return debug.compare(node, json.load(testf))
 
 
 def testEl(node, idx, name):
@@ -87,13 +96,23 @@ def test_pointer():
     testEl(node, 6, '*')
     testEl(node, 7, 'CONST')
 
-def test_primary_expression():
-    arr = ['my_cool_var   ', '0x55', '1234', '"abcd"', '']
 
 
 def test_generic_selection():
     node = process('_Generic( \'a\', char: 1, int: 2, long: 3, default: 0)', 'parse_generic_selection')
-    print(node)
+    printNode(node)
+
+
+def test_arifmetic():
+    node = process('2+3*7%1', 'parse_expression')
+    printNode(node)
+
+def test_simple():
+    node = process('int main() {return 0;}', 'parse')
+    print('test_simple')
+    printNode(node)
+
+
 
 
 
@@ -102,5 +121,23 @@ test_type_qualifier()
 test_function_specifier()
 test_type_qualifier_list()
 test_pointer()
-test_primary_expression()
-test_generic_selection()
+
+def test():
+    tests = [
+        'simple_main',
+        'simple_program',
+        'simple_if'
+    ]
+    counter = 0
+    for test in tests:
+        if not processFile('./tests/' + test):
+            print("ERROR passing test {}".format(test))
+            counter += 1
+
+    print("{} passed, {} failed".format(len(tests)-counter, counter))
+    assert counter == 0
+
+test()
+
+
+
