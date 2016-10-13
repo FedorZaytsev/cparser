@@ -1,0 +1,23 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+
+
+int main(){
+
+
+    enum test {
+        ONE,
+        TWO
+    };
+
+    enum {
+        THREE = 3,
+        FOUR
+    };
+
+    printf("%d, %d", ONE, THREE);
+
+
+}

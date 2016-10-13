@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+
+
+int main(){
+
+    int i = 0;
+    for (;i<3;i++) {
+        printf("Eeeee, loops!!!\n");
+        for (int k=0;k<2;k++)
+            printf("don't worry, thats me again!\n");
+        int q = 0;
+        while (q != 3) {
+            printf("q is equal %d, really?\n", q);
+            q++;
+        }
+        do {
+            printf("no one use do {} loops fool!\n");
+            q--;
+        } while (q >2);
+
+        do q+=2; while(q < 10);
+    }
+
+    return 0;
+}

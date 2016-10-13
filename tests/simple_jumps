@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+
+
+int main(){
+
+    int i=0;
+    while (i==0)
+        break;
+
+    while (i>0)
+        continue;
+
+    goto TEST_LABEL;
+
+TEST_LABEL:
+    printf("end");
+    return 0;
+}

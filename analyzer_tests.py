@@ -97,25 +97,6 @@ def test_pointer():
     testEl(node, 7, 'CONST')
 
 
-
-def test_generic_selection():
-    node = process('_Generic( \'a\', char: 1, int: 2, long: 3, default: 0)', 'parse_generic_selection')
-    printNode(node)
-
-
-def test_arifmetic():
-    node = process('2+3*7%1', 'parse_expression')
-    printNode(node)
-
-def test_simple():
-    node = process('int main() {return 0;}', 'parse')
-    print('test_simple')
-    printNode(node)
-
-
-
-
-
 test_storage_class_specifier()
 test_type_qualifier()
 test_function_specifier()
@@ -124,9 +105,16 @@ test_pointer()
 
 def test():
     tests = [
+        'bin2hex_c',
+        'simple_enum',
+        'simple_if',
+        'simple_jumps',
+        'simple_loops',
         'simple_main',
         'simple_program',
-        'simple_if'
+        'simple_static_assert',
+        'simple_struct',
+        #'simple_switch',
     ]
     counter = 0
     for test in tests:

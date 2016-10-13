@@ -1,0 +1,420 @@
+{
+    "childs": [
+        {
+            "childs": [
+                {
+                    "childs": [
+                        {
+                            "childs": [
+                                {
+                                    "childs": [
+                                        "INT"
+                                    ],
+                                    "name": "type_specifier"
+                                }
+                            ],
+                            "name": "declaration_specifiers"
+                        },
+                        {
+                            "childs": [
+                                {
+                                    "childs": [
+                                        "IDENTIFIER",
+                                        "(",
+                                        {
+                                            "childs": [
+                                                {
+                                                    "childs": [
+                                                        {
+                                                            "childs": [
+                                                                {
+                                                                    "childs": [
+                                                                        {
+                                                                            "childs": [
+                                                                                "VOID"
+                                                                            ],
+                                                                            "name": "type_specifier"
+                                                                        }
+                                                                    ],
+                                                                    "name": "declaration_specifiers"
+                                                                }
+                                                            ],
+                                                            "name": "parameter_declaration"
+                                                        }
+                                                    ],
+                                                    "name": "parameter_list"
+                                                }
+                                            ],
+                                            "name": "parameter_type_list"
+                                        },
+                                        ")"
+                                    ],
+                                    "name": "direct_declarator"
+                                }
+                            ],
+                            "name": "declarator"
+                        },
+                        {
+                            "childs": [
+                                "{",
+                                {
+                                    "childs": [
+                                        {
+                                            "childs": [
+                                                {
+                                                    "childs": [
+                                                        {
+                                                            "childs": [
+                                                                "STATIC_ASSERT",
+                                                                "(",
+                                                                {
+                                                                    "childs": [
+                                                                        {
+                                                                            "childs": [
+                                                                                {
+                                                                                    "childs": [
+                                                                                        {
+                                                                                            "childs": [
+                                                                                                {
+                                                                                                    "childs": [
+                                                                                                        {
+                                                                                                            "childs": [
+                                                                                                                {
+                                                                                                                    "childs": [
+                                                                                                                        {
+                                                                                                                            "childs": [
+                                                                                                                                {
+                                                                                                                                    "childs": [
+                                                                                                                                        {
+                                                                                                                                            "childs": [
+                                                                                                                                                {
+                                                                                                                                                    "childs": [
+                                                                                                                                                        {
+                                                                                                                                                            "childs": [
+                                                                                                                                                                {
+                                                                                                                                                                    "childs": [
+                                                                                                                                                                        {
+                                                                                                                                                                            "childs": [
+                                                                                                                                                                                {
+                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                        {
+                                                                                                                                                                                            "childs": [
+                                                                                                                                                                                                {
+                                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                                        "I_CONSTANT"
+                                                                                                                                                                                                    ],
+                                                                                                                                                                                                    "name": "constant"
+                                                                                                                                                                                                }
+                                                                                                                                                                                            ],
+                                                                                                                                                                                            "name": "primary_expression"
+                                                                                                                                                                                        }
+                                                                                                                                                                                    ],
+                                                                                                                                                                                    "name": "postfix_expression"
+                                                                                                                                                                                }
+                                                                                                                                                                            ],
+                                                                                                                                                                            "name": "unary_expression"
+                                                                                                                                                                        }
+                                                                                                                                                                    ],
+                                                                                                                                                                    "name": "cast_expression"
+                                                                                                                                                                }
+                                                                                                                                                            ],
+                                                                                                                                                            "name": "multiplicative_expression"
+                                                                                                                                                        },
+                                                                                                                                                        "+",
+                                                                                                                                                        {
+                                                                                                                                                            "childs": [
+                                                                                                                                                                {
+                                                                                                                                                                    "childs": [
+                                                                                                                                                                        {
+                                                                                                                                                                            "childs": [
+                                                                                                                                                                                {
+                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                        {
+                                                                                                                                                                                            "childs": [
+                                                                                                                                                                                                {
+                                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                                        "I_CONSTANT"
+                                                                                                                                                                                                    ],
+                                                                                                                                                                                                    "name": "constant"
+                                                                                                                                                                                                }
+                                                                                                                                                                                            ],
+                                                                                                                                                                                            "name": "primary_expression"
+                                                                                                                                                                                        }
+                                                                                                                                                                                    ],
+                                                                                                                                                                                    "name": "postfix_expression"
+                                                                                                                                                                                }
+                                                                                                                                                                            ],
+                                                                                                                                                                            "name": "unary_expression"
+                                                                                                                                                                        }
+                                                                                                                                                                    ],
+                                                                                                                                                                    "name": "cast_expression"
+                                                                                                                                                                }
+                                                                                                                                                            ],
+                                                                                                                                                            "name": "multiplicative_expression"
+                                                                                                                                                        }
+                                                                                                                                                    ],
+                                                                                                                                                    "name": "additive_expression"
+                                                                                                                                                }
+                                                                                                                                            ],
+                                                                                                                                            "name": "shift_expression"
+                                                                                                                                        }
+                                                                                                                                    ],
+                                                                                                                                    "name": "relational_expression"
+                                                                                                                                },
+                                                                                                                                "EQ_OP",
+                                                                                                                                {
+                                                                                                                                    "childs": [
+                                                                                                                                        {
+                                                                                                                                            "childs": [
+                                                                                                                                                {
+                                                                                                                                                    "childs": [
+                                                                                                                                                        {
+                                                                                                                                                            "childs": [
+                                                                                                                                                                {
+                                                                                                                                                                    "childs": [
+                                                                                                                                                                        {
+                                                                                                                                                                            "childs": [
+                                                                                                                                                                                {
+                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                        {
+                                                                                                                                                                                            "childs": [
+                                                                                                                                                                                                {
+                                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                                        "I_CONSTANT"
+                                                                                                                                                                                                    ],
+                                                                                                                                                                                                    "name": "constant"
+                                                                                                                                                                                                }
+                                                                                                                                                                                            ],
+                                                                                                                                                                                            "name": "primary_expression"
+                                                                                                                                                                                        }
+                                                                                                                                                                                    ],
+                                                                                                                                                                                    "name": "postfix_expression"
+                                                                                                                                                                                }
+                                                                                                                                                                            ],
+                                                                                                                                                                            "name": "unary_expression"
+                                                                                                                                                                        }
+                                                                                                                                                                    ],
+                                                                                                                                                                    "name": "cast_expression"
+                                                                                                                                                                }
+                                                                                                                                                            ],
+                                                                                                                                                            "name": "multiplicative_expression"
+                                                                                                                                                        }
+                                                                                                                                                    ],
+                                                                                                                                                    "name": "additive_expression"
+                                                                                                                                                }
+                                                                                                                                            ],
+                                                                                                                                            "name": "shift_expression"
+                                                                                                                                        }
+                                                                                                                                    ],
+                                                                                                                                    "name": "relational_expression"
+                                                                                                                                }
+                                                                                                                            ],
+                                                                                                                            "name": "equality_expression"
+                                                                                                                        }
+                                                                                                                    ],
+                                                                                                                    "name": "and_expression"
+                                                                                                                }
+                                                                                                            ],
+                                                                                                            "name": "exclusive_or_expression"
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "name": "inclusive_or_expression"
+                                                                                                }
+                                                                                            ],
+                                                                                            "name": "logical_and_expression"
+                                                                                        }
+                                                                                    ],
+                                                                                    "name": "logical_or_expression"
+                                                                                }
+                                                                            ],
+                                                                            "name": "conditional_expression"
+                                                                        }
+                                                                    ],
+                                                                    "name": "constant_expression"
+                                                                },
+                                                                ",",
+                                                                "STRING_LITERAL",
+                                                                ")",
+                                                                ";",
+                                                                "COMMENT"
+                                                            ],
+                                                            "name": "static_assert_declaration"
+                                                        }
+                                                    ],
+                                                    "name": "declaration"
+                                                }
+                                            ],
+                                            "name": "block_item"
+                                        },
+                                        {
+                                            "childs": [
+                                                {
+                                                    "childs": [
+                                                        {
+                                                            "childs": [
+                                                                "STATIC_ASSERT",
+                                                                "(",
+                                                                {
+                                                                    "childs": [
+                                                                        {
+                                                                            "childs": [
+                                                                                {
+                                                                                    "childs": [
+                                                                                        {
+                                                                                            "childs": [
+                                                                                                {
+                                                                                                    "childs": [
+                                                                                                        {
+                                                                                                            "childs": [
+                                                                                                                {
+                                                                                                                    "childs": [
+                                                                                                                        {
+                                                                                                                            "childs": [
+                                                                                                                                {
+                                                                                                                                    "childs": [
+                                                                                                                                        {
+                                                                                                                                            "childs": [
+                                                                                                                                                {
+                                                                                                                                                    "childs": [
+                                                                                                                                                        {
+                                                                                                                                                            "childs": [
+                                                                                                                                                                {
+                                                                                                                                                                    "childs": [
+                                                                                                                                                                        {
+                                                                                                                                                                            "childs": [
+                                                                                                                                                                                "SIZEOF",
+                                                                                                                                                                                "(",
+                                                                                                                                                                                {
+                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                        {
+                                                                                                                                                                                            "childs": [
+                                                                                                                                                                                                {
+                                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                                        "INT"
+                                                                                                                                                                                                    ],
+                                                                                                                                                                                                    "name": "type_specifier"
+                                                                                                                                                                                                }
+                                                                                                                                                                                            ],
+                                                                                                                                                                                            "name": "specifier_qualifier_list"
+                                                                                                                                                                                        }
+                                                                                                                                                                                    ],
+                                                                                                                                                                                    "name": "type_name"
+                                                                                                                                                                                },
+                                                                                                                                                                                ")"
+                                                                                                                                                                            ],
+                                                                                                                                                                            "name": "unary_expression"
+                                                                                                                                                                        }
+                                                                                                                                                                    ],
+                                                                                                                                                                    "name": "cast_expression"
+                                                                                                                                                                }
+                                                                                                                                                            ],
+                                                                                                                                                            "name": "multiplicative_expression"
+                                                                                                                                                        }
+                                                                                                                                                    ],
+                                                                                                                                                    "name": "additive_expression"
+                                                                                                                                                }
+                                                                                                                                            ],
+                                                                                                                                            "name": "shift_expression"
+                                                                                                                                        },
+                                                                                                                                        "<",
+                                                                                                                                        {
+                                                                                                                                            "childs": [
+                                                                                                                                                {
+                                                                                                                                                    "childs": [
+                                                                                                                                                        {
+                                                                                                                                                            "childs": [
+                                                                                                                                                                {
+                                                                                                                                                                    "childs": [
+                                                                                                                                                                        {
+                                                                                                                                                                            "childs": [
+                                                                                                                                                                                "SIZEOF",
+                                                                                                                                                                                "(",
+                                                                                                                                                                                {
+                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                        {
+                                                                                                                                                                                            "childs": [
+                                                                                                                                                                                                {
+                                                                                                                                                                                                    "childs": [
+                                                                                                                                                                                                        "CHAR"
+                                                                                                                                                                                                    ],
+                                                                                                                                                                                                    "name": "type_specifier"
+                                                                                                                                                                                                }
+                                                                                                                                                                                            ],
+                                                                                                                                                                                            "name": "specifier_qualifier_list"
+                                                                                                                                                                                        }
+                                                                                                                                                                                    ],
+                                                                                                                                                                                    "name": "type_name"
+                                                                                                                                                                                },
+                                                                                                                                                                                ")"
+                                                                                                                                                                            ],
+                                                                                                                                                                            "name": "unary_expression"
+                                                                                                                                                                        }
+                                                                                                                                                                    ],
+                                                                                                                                                                    "name": "cast_expression"
+                                                                                                                                                                }
+                                                                                                                                                            ],
+                                                                                                                                                            "name": "multiplicative_expression"
+                                                                                                                                                        }
+                                                                                                                                                    ],
+                                                                                                                                                    "name": "additive_expression"
+                                                                                                                                                }
+                                                                                                                                            ],
+                                                                                                                                            "name": "shift_expression"
+                                                                                                                                        }
+                                                                                                                                    ],
+                                                                                                                                    "name": "relational_expression"
+                                                                                                                                }
+                                                                                                                            ],
+                                                                                                                            "name": "equality_expression"
+                                                                                                                        }
+                                                                                                                    ],
+                                                                                                                    "name": "and_expression"
+                                                                                                                }
+                                                                                                            ],
+                                                                                                            "name": "exclusive_or_expression"
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "name": "inclusive_or_expression"
+                                                                                                }
+                                                                                            ],
+                                                                                            "name": "logical_and_expression"
+                                                                                        }
+                                                                                    ],
+                                                                                    "name": "logical_or_expression"
+                                                                                }
+                                                                            ],
+                                                                            "name": "conditional_expression"
+                                                                        }
+                                                                    ],
+                                                                    "name": "constant_expression"
+                                                                },
+                                                                ",",
+                                                                "STRING_LITERAL",
+                                                                ")",
+                                                                ";",
+                                                                "COMMENT"
+                                                            ],
+                                                            "name": "static_assert_declaration"
+                                                        }
+                                                    ],
+                                                    "name": "declaration"
+                                                }
+                                            ],
+                                            "name": "block_item"
+                                        }
+                                    ],
+                                    "name": "block_item_list"
+                                },
+                                "}"
+                            ],
+                            "name": "compound_statement"
+                        }
+                    ],
+                    "name": "function_definition"
+                }
+            ],
+            "name": "external_declaration"
+        }
+    ],
+    "name": "translation_unit"
+}

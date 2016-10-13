@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+
+
+struct mystruct {
+    int a;
+    float b;
+    struct {
+        float q;
+    } t;
+};
+
+
+int main(){
+
+    struct mystruct m;
+    m.a = 1;
+    m.b = 1.0f;
+    m.t.q = 1.0f;
+
+
+    printf("%f", m.t.q);
+}

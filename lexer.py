@@ -43,6 +43,12 @@ class Position:
     def match(self, str2):
         return self.text.find(str2, self.position, self.position + len(str2) + 1) == self.position
 
+    def __lt__(self, other):
+        return self.position < other.position
+
+    def __gt__(self, other):
+        return self.position > other.position
+
     def __eq__(self, other):
         return self.position == other.position
 
@@ -50,7 +56,7 @@ class Position:
         return not self == other
 
     def __str__(self):
-        return "{} of {} ({}, {})".format(self.position, len(self.text), self.line, self.column)
+        return "{} of {} ({}, {}) curr '{}'".format(self.position, len(self.text), self.line, self.column, self.getChar())
 
 
 class Lexem:
@@ -177,14 +183,15 @@ class Lexer:
         self.lst = []
         self.states = []
 
+        #order is important
         while not self.ptr.isEnd():
             if self.parsePreprocessor(): continue
             if self.parseWhitespace(): continue
             if self.parseComment(): continue
             if self.parseOperators(): continue
             if self.parseIdent(): continue
-            if self.parseInt(): continue
             if self.parseFloat(): continue
+            if self.parseInt(): continue
             if self.parseString(): continue
 
             print("Unknown token '{}'".format(self.ptr.getStringForDebug()))
@@ -363,12 +370,15 @@ class Lexer:
 
         parsers = [self.parseInt1, self.parseInt2, self.parseInt3, self.parseInt4]
 
+        best = copy.copy(self.ptr)
         for f in parsers:
             end = copy.copy(self.ptr)
             if f(end):
-                self.pushLexem("I_CONSTANT", self.ptr.getString(end))
-                return True
-
+                if end > best:
+                    best = end
+        if best != self.ptr:
+            self.pushLexem("I_CONSTANT", self.ptr.getString(best))
+            return True
         return False
 
     # {HP}{H}+{IS}?
@@ -420,12 +430,15 @@ class Lexer:
     def parseFloat(self):
         parsers = [self.parseFloat1, self.parseFloat2, self.parseFloat3, self.parseFloat4, self.parseFloat5,
                    self.parseFloat6]
+        best = copy.copy(self.ptr)
         for f in parsers:
             end = copy.copy(self.ptr)
             if f(end):
-                self.pushLexem("F_CONSTANT", self.ptr.getString(end))
-                return True
-
+                if end > best:
+                    best = end
+        if best != self.ptr:
+            self.pushLexem("F_CONSTANT", self.ptr.getString(best))
+            return True
         return False
 
     # {D}+{E}{FS}?
@@ -444,7 +457,7 @@ class Lexer:
     # F_CONSTANT
     def parseFloat2(self, ptr):
         self.parseRec(self.parseD, ptr)
-        if not ptr.getChar == '.':
+        if not ptr.getChar() == '.':
             return False
         ptr.next()
 

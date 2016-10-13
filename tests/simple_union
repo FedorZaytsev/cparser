@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+
+union Cool {
+    int i;
+    float f;
+    char str[1];
+};
+
+int main( ) {
+
+    union Cool data;
+
+    data.i = 10;
+    data.f = 220.5;
+
+    return 0;
+}

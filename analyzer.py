@@ -1059,7 +1059,7 @@ class Analyzer:
     def parse_enum_specifier(self):
         node = Node.create('enum_specifier')
 
-        node.append(self.checkLexem('enum_specifier', 'ENUM'))
+        node.append(self.checkLexem('enum_specifier', ['ENUM']))
         if node.append(self.try2(self.checkLexem, ['enum_specifier', ['{']])):
             node.append(self.parse_enumerator_list())
             node.append(self.try2(self.checkLexem, ['enumerator_list', [',']]))

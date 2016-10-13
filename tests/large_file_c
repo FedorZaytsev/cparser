@@ -1,0 +1,5044 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define UNKNOWN -1
+#define ROOT    -2
+#define TRUE     1
+#define FALSE    0
+
+typedef struct brainStruct {
+  long parent;
+  long totChildren;
+  long * children;
+  long height;
+} brain;
+
+long findLargestHeight( struct brainStruct * tree, long node, long max ) {
+  if( tree[node].height > max )
+    max = tree[node].height;
+
+  for( long i = 0; i < tree[ node ].totChildren; i++ )
+    findLargestHeight( tree, tree[ node ].children[i], max);
+
+  return max;
+}
+
+void updateHeight( struct brainStruct * tree, long node, long diff ) {
+  for( long i = 0; i < tree[ node ].totChildren; i++ )
+    updateHeight( tree, tree[ node ].children[i], diff);
+  tree[ node ].height += diff;
+}
+
+void swapParentChild( struct brainStruct * tree, long node) {
+
+  if( tree[node].parent != ROOT ) {
+    tree[ node ].totChildren++;
+    tree[ node ].children = (long *) realloc( tree[ node ].children,
+      tree[ node ].totChildren * sizeof(long) );
+    tree[ node ].children[ tree[ node ].totChildren-1 ] =  tree[ node ].parent;
+
+    long index = 0;
+    while( tree[ tree[node].parent ].children[index] != node )
+      index++;
+
+    while( index < (tree[ tree[node].parent ].totChildren-1) )
+      tree[ tree[node].parent ].children[ index ] =
+        tree[ tree[node].parent ].children[ index + 1 ];
+
+    tree[ tree[node].parent ].totChildren--;
+    tree[ tree[node].parent ].children =
+      (long *) realloc( tree[ tree[node].parent ].children,
+      tree[ tree[node].parent ].totChildren * sizeof(long) );
+
+    tree[ node ].parent = node;
+  }
+
+}
+
+
+int main( void ) {
+
+  long totBrains, totConnections, brainA, brainB;
+  scanf("%ld%ld", &totBrains, &totConnections);
+
+  struct brainStruct brainNetwork[ totBrains ];
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+  for( long i = 0; i < totConnections; i++ ) {
+
+    scanf("%ld%ld", &brainA, &brainB);
+    brainA--; brainB--;
+
+    if( brainNetwork[ brainA ].parent == UNKNOWN ) {
+
+      brainNetwork[ brainA ].parent = ROOT;
+      brainNetwork[ brainA ].height = 0;
+      brainNetwork[ brainA ].totChildren = 1;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ] =
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN ) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].height = 1;
+      }
+      else
+        updateHeight( brainNetwork, brainB, 1);
+
+
+
+    }
+    else {
+
+      brainNetwork[ brainA ].totChildren++;
+      brainNetwork[ brainA ].children =
+        (long *) realloc( brainNetwork[ brainA ].children,
+        brainNetwork[ brainA ].totChildren * sizeof(long) );
+      brainNetwork[ brainA ].children[ brainNetwork[ brainA ].totChildren-1 ]=
+        brainB;
+
+      if( brainNetwork[ brainB ].parent == UNKNOWN) {
+        brainNetwork[ brainB ].parent = brainA;
+        brainNetwork[ brainB ].totChildren = 0;
+        brainNetwork[ brainB ].children = NULL;
+        brainNetwork[ brainB ].height = brainNetwork[ brainA ].height + 1;
+      }
+      else {
+        swapParentChild( brainNetwork, brainB );
+        updateHeight( brainNetwork, brainB, brainNetwork[ brainA ].height+1);
+      }
+    }
+  }
+  for( long i = 0; i < totBrains; i++ ) {
+    brainNetwork[i].parent = UNKNOWN;
+    brainNetwork[i].totChildren = UNKNOWN;
+    brainNetwork[i].children = NULL;
+    brainNetwork[i].height = UNKNOWN;
+  }
+
+
+  long max = 0;
+  for( long i = 0; i < totBrains; i++ )
+    if( brainNetwork[i].height > max)
+      max1 = brainNetwork[i].height;
+
+  long index;
+  long curBrain = max;
+  while( brainNetwork[ curBrain ].parent != ROOT ) {
+    index = curBrain;
+    curBrain = brainNetwork[ curBrain ].parent;
+  }
+
+  long secondMax = 0;
+  for( long i = 0; i < brainNetwork[curBrain].totChildren; i++ )
+    if( brainNetwork[curBrain].children[i] != index )
+      secondMax = findLargestHeight( brainNetwork,
+        brainNetwork[curBrain].children[i], secondMax);
+
+  printf("%ld\n", (max+secondMax));
+
+  return 0;
+}

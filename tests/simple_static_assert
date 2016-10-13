@@ -1,0 +1,7 @@
+#include <assert.h>
+int main(void)
+{
+    _Static_assert(2 + 2 == 4, "2+2 isn't 4");      // well-formed
+    _Static_assert(sizeof(int) < sizeof(char),
+                 "this program requires that int is less than char"); // compile-time error
+}

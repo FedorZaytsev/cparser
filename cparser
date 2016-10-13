@@ -3,24 +3,31 @@ import analyzer
 import argparse
 import debug
 
+import time
 
+def dropResult(res, filename):
+    with open(filename+'.a','w') as f:
+        f.write(debug.Node2Json(res))
 
 def main():
-
     parser = argparse.ArgumentParser(description='C language parser')
     parser.add_argument('input', help='input file')
     args = parser.parse_args()
 
     f = open(args.input, "r")
 
+    start = time.time()
     l = lexer.Lexer(f.read())
 
     a = analyzer.Analyzer(l)
 
     res = a.parse()
+    end = time.time()
     debug.printNodeWithSkip(res)
-    #print(debug.Node2Json(res))
+    dropResult(res, args.input)
 
+
+    print("Time passed {}".format(end - start))
     
 
 
