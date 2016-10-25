@@ -1,4 +1,4 @@
-
+import analyzer
 
 class NodeChildIterator():
     def __init__(self, node):
@@ -79,6 +79,12 @@ class Node():
     def normalize(self):
         if len(self.children) == 1:
             return self.children[0]
+        return self
+
+    def dropExceptionIfEmpty(self):
+        if self.count() == 0:
+            raise analyzer.AnalyzerException(self.name, 'empty node')
+
         return self
 
     def __str__(self):

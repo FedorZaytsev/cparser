@@ -1,5 +1,6 @@
 import Cgrammar
 import Node
+import lexer
 
 
 class AnalyzerException(Exception):
@@ -58,12 +59,17 @@ class Analyzer:
         node.append(self.parse_external_declaration())
         self.parse_translation_unit_lr(node)
 
+        if not self.lexer.isEnd():
+
+            raise AnalyzerException("translation_unit", "ERR at pos {}".format(self.lexer.get().position))
+
         return node
 
     def parse_translation_unit_lr(self, node):
-
+        if self.lexer.isEnd():
+            return
         if node.append(self.try2(self.parse_external_declaration)):
-             self.parse_translation_unit_lr(node)
+            self.parse_translation_unit_lr(node)
         return node
 
     def parse_external_declaration(self):
@@ -73,7 +79,32 @@ class Analyzer:
         if node.append(self.try2(self.parse_declaration)):
             return node
 
-        raise AnalyzerException('external_declaration', '')
+        return self.skipFuncDef()
+        #raise AnalyzerException('external_declaration', "ERR at pos {}".format(self.lexer.get().position))
+
+    def skipFuncDef(self):
+        node = Node.create('ERROR')
+
+        begin = self.lexer.get()
+        while self.lexer.get().getType() != '{' and self.lexer.get().getType() != ';' and not self.lexer.isEnd():
+            #node.append(self.lexer.get())
+            self.lexer.next()
+        if self.lexer.get().getType() == ';':
+            self.lexer.next()
+            return node
+        self.lexer.next()
+        count = 1
+        while count > 0 and not self.lexer.isEnd():
+            lexem = self.lexer.get()
+            #node.append(lexem)
+            if lexem.getType() == '{':
+                count += 1
+            if lexem.getType() == '}':
+                count -= 1
+            self.lexer.next()
+
+        return node
+
 
     def parse_function_definition(self):
         node = Node.create('function_definition')
@@ -85,15 +116,15 @@ class Analyzer:
 
         return node
 
-    def parse_declaration_specifiers(self):
+    def parse_declaration_specifiers(self, allow_ident=True):
         node = Node.create('declaration_specifiers')
 
         if node.append(self.try2(self.parse_storage_class_specifier)):
             node.append(self.try2(self.parse_declaration_specifiers))
             return node
 
-        if node.append(self.try2(self.parse_type_specifier)):
-            node.append(self.try2(self.parse_declaration_specifiers))
+        if node.append(self.try2(self.parse_type_specifier, [allow_ident])):
+            node.append(self.try2(self.parse_declaration_specifiers, [self.lexer.get(1).getType() == 'IDENTIFIER']))
             return node
 
         if node.append(self.try2(self.parse_type_qualifier)):
@@ -120,7 +151,7 @@ class Analyzer:
         raise AnalyzerException('storage_class_specifier',
                                 'expected {} got {}'.format(', '.join(arr), self.lexer.get().getType()))
 
-    def parse_type_specifier(self):
+    def parse_type_specifier(self, allow_ident=True):
         node = Node.create('type_specifier')
         arr = ['VOID', 'CHAR', 'SHORT', 'INT', 'LONG', 'FLOAT', 'DOUBLE', 'SIGNED', 'UNSIGNED', 'BOOL', 'COMPLEX',
                'IMAGINARY']
@@ -138,14 +169,13 @@ class Analyzer:
             return node
 
         # TODO change that to TYPEDEF_NAME
-        #if node.append(self.try2(self.checkLexem, ['type_specifier', ['IDENTIFIER']])):
-        #    return node
+        if allow_ident and node.append(self.try2(self.checkLexem, ['type_specifier', ['IDENTIFIER']])):
+            return node
 
         raise AnalyzerException('type_specifier',
                                 'expected {}, atomic_type, struct, union, enum or identifier got {}'.format(
                                     ', '.join(arr), self.lexer.get().getType()))
 
-    # tested
     def parse_type_qualifier(self):
         node = Node.create('type_qualifier')
 
@@ -154,9 +184,9 @@ class Analyzer:
 
         return node
 
-    # tested
     def parse_function_specifier(self):
         node = Node.create('function_specifier')
+
         arr = ['INLINE', 'NORETURN']
         if node.append(self.try2(self.checkLexem, ['function_specifier', arr])):
             return node
@@ -658,14 +688,52 @@ class Analyzer:
     def parse_cast_expression(self):
         node = Node.create('cast_expression')
 
-        if node.append(self.try2(self.parse_unary_expression)):
-            return node
+        def mayBeType(idx):
+            arr = ['CONST', 'CHAR', 'DOUBLE', 'ENUM', 'FLOAT', 'INT', 'UNSIGNED', 'LONG', 'SHORT', 'SIGNED', 'VOID', 'BOOL']
+            count = 0
+            lex = self.lexer.get(count + idx)
+            while lex.getType() in arr:
+                count += 1
+                lex = self.lexer.get(count + idx)
 
-        if node.append(self.try2(self.checkLexem, ['cast_expression', ['(']])):
-            node.append(self.parse_type_name())
-            node.append(self.checkLexem('cast_expression', [')']))
-            node.append(self.parse_cast_expression())
-            return node
+            if count >= 1:
+                for i in range(1, count):
+                    self.lexer.next()
+                while self.lexer.get(idx + 1).getType() == '*':
+                    self.lexer.next()
+                return True
+            if count == 0:
+                if self.lexer.get(idx).getType() == 'STRUCT':
+                    self.lexer.next()
+                if self.lexer.get(idx).getType() == 'IDENTIFIER':
+                    while self.lexer.get(idx+1).getType() == '*':
+                        self.lexer.next()
+                    return True
+
+            return False
+
+
+
+
+        #heuristic
+        self.lexer.pushState()
+        if self.lexer.get(0).getType() == '(' and \
+            mayBeType(1) and \
+            self.lexer.get(2).getType() == ')' and \
+            (self.lexer.get(3).getType() == 'IDENTIFIER' or
+                 (self.lexer.get(3).getType() == '&' and self.lexer.get(4).getType() == 'IDENTIFIER') or
+                 (self.lexer.get(3).getType() == '(')):
+
+            self.lexer.popState()
+            if node.append(self.try2(self.checkLexem, ['cast_expression', ['(']])):
+                node.append(self.parse_type_name())
+                node.append(self.checkLexem('cast_expression', [')']))
+                node.append(self.parse_cast_expression())
+                return node
+        else:
+            self.lexer.popState()
+            if node.append(self.try2(self.parse_unary_expression)):
+                return node
 
         raise AnalyzerException('cast_expression', '')
 
@@ -719,7 +787,6 @@ class Analyzer:
             node.append(self.checkLexem('postfix_expression', [')']))
             node.append(self.checkLexem('postfix_expression', ['{']))
             node.append(self.parse_initializer_list())
-            node.append(self.try2(self.checkLexem, ['postfix_expression', [',']]))
             node.append(self.checkLexem('postfix_expression', ['}']))
             self.parse_postfix_expression_lr(node)
             return node
@@ -756,14 +823,14 @@ class Analyzer:
     def parse_argument_expression_list(self):
         node = Node.create('argument_expression_list')
 
-        node.append(self.parse_assignment_expression())
+        self.restore(node, self.parse_assignment_expression)
         self.parse_argument_expression_list_lr(node)
 
-        return node
+        return node.dropExceptionIfEmpty()
 
     def parse_argument_expression_list_lr(self, node):
         if node.append(self.try2(self.checkLexem, ['argument_expression_list_lr', [',']])):
-            node.append(self.parse_assignment_expression())
+            self.restore(node, self.parse_assignment_expression)
             self.parse_argument_expression_list_lr(node)
 
         return node
@@ -792,9 +859,15 @@ class Analyzer:
 
     def parse_initializer_list_lr(self, node):
         if node.append(self.try2(self.checkLexem, ['initializer_list_lr', [',']])):
-            node.append(self.try2(self.parse_designation))
-            node.append(self.parse_initializer())
-            self.parse_initializer_list_lr(node)
+            if node.append(self.try2(self.parse_designation)):
+                node.append(self.try2(self.parse_initializer))
+                self.parse_initializer_list_lr(node)
+                return
+
+            if node.append(self.try2(self.parse_initializer)):
+                self.parse_initializer_list_lr(node)
+                return
+
 
     def parse_designation(self):
         node = Node.create('designation')
@@ -1005,7 +1078,7 @@ class Analyzer:
     def parse_struct_declaration(self):
         node = Node.create('struct_declaration')
 
-        if node.append(self.try2(self.parse_specifier_qualifier_list)):
+        if node.append(self.try2(self.parse_type_name)):
             node.append(self.try2(self.parse_struct_declarator_list))
             node.append(self.checkLexem('struct_declaration', [';']))
             return node
@@ -1220,6 +1293,9 @@ class Analyzer:
         node = Node.create('expression_statement')
 
         node.append(self.try2(self.parse_expression))
+        #if node.count() > 0:
+        #    self.restore(node, self.checkLexem, ['expression_statement', [';']])
+        #else:
         node.append(self.checkLexem('expression_statement', [';']))
 
         return node
@@ -1306,3 +1382,38 @@ class Analyzer:
     def parse_declaration_list_lr(self, node):
         if node.append(self.try2(self.parse_declaration)):
             self.parse_declaration_list_lr(node)
+
+    def processFollow(self, rulename):
+        begin = self.lexer.get()
+        follow = Cgrammar.CGrammar[rulename]['follow']
+        while self.lexer.get().getType() not in follow:
+            self.lexer.next()
+
+        return begin.position, begin.position.getString(self.lexer.get().position)
+
+    def restore(self, node, func, args=[]):
+        result = None
+        try:
+            result = func(*args)
+        except AnalyzerException as e:
+            position, skippedText = self.processFollow(e.rule)
+            if position != self.lexer.get().position:
+                print("ERROR: cannot parse {} in rule {} at pos {}".format(skippedText, e.rule, position))
+                result = Node.create('ERROR')
+                result.append(lexer.Lexem(position, skippedText, 'ERROR'))
+        finally:
+            node.append(result)
+
+    def restorec(self, node, func, args=[]):
+        result = None
+        try:
+            result = func(*args)
+        except AnalyzerException as e:
+            print("ERROR: {}".format(e))
+            result = Node.create('err')
+        finally:
+            node.concat(result)
+
+
+
+

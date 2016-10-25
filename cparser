@@ -2,7 +2,7 @@ import lexer
 import analyzer
 import argparse
 import debug
-
+import sys
 import time
 
 def dropResult(res, filename):
@@ -14,9 +14,12 @@ def main():
     parser.add_argument('input', help='input file')
     args = parser.parse_args()
 
+    print("parsing {}".format(args.input))
+
     f = open(args.input, "r")
 
     start = time.time()
+    #try:
     l = lexer.Lexer(f.read())
 
     a = analyzer.Analyzer(l)
@@ -24,10 +27,12 @@ def main():
     res = a.parse()
     end = time.time()
     debug.printNodeWithSkip(res)
-    dropResult(res, args.input)
-
+    #dropResult(res, args.input)
 
     print("Time passed {}".format(end - start))
+    #except:
+    #    print("Error occurred during parsing {}".format(args.input))
+    #    sys.exit(1)
     
 
 

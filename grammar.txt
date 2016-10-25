@@ -93,8 +93,8 @@ block_item_list_lr
     ;
 
 cast_expression
-    : unary_expression
-    | '(', type_name, ')', cast_expression
+    : '(', type_name, ')', cast_expression unary_expression
+    | unary_expression
     ;
 
 compound_statement
@@ -344,7 +344,6 @@ init_declarator_list_lr
 
 initializer
     : '{', initializer_list, '}'
-    | '{', initializer_list, ',', '}'
     | assignment_expression
     ;
 
@@ -356,6 +355,7 @@ initializer_list
 initializer_list_lr
     : ',', designation, initializer, initializer_list_lr
     | ',', initializer, initializer_list_lr
+    | ','
     | E
     ;
 
@@ -441,7 +441,6 @@ pointer
 postfix_expression
     : primary_expression, postfix_expression_lr
     | '(', type_name, ')', '{', initializer_list, '}', postfix_expression_lr
-    | '(', type_name, ')', '{', initializer_list, ',', '}', postfix_expression_lr
     ;
 
 postfix_expression_lr
@@ -527,8 +526,8 @@ string
     ;
 
 struct_declaration
-    : specifier_qualifier_list, ';'
-    | specifier_qualifier_list, struct_declarator_list, ';'
+    : type_name, ';'
+    | type_name, struct_declarator_list, ';'
     | static_assert_declaration
     ;
 

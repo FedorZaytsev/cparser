@@ -118,6 +118,7 @@ def test():
     ]
     counter = 0
     for test in tests:
+        print("parsing {}".format(test))
         if not processFile('./tests/' + test):
             print("ERROR passing test {}".format(test))
             counter += 1

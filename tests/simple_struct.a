@@ -26,71 +26,28 @@
                                                                     "childs": [
                                                                         {
                                                                             "childs": [
-                                                                                "INT"
-                                                                            ],
-                                                                            "name": "type_specifier"
-                                                                        }
-                                                                    ],
-                                                                    "name": "specifier_qualifier_list"
-                                                                },
-                                                                {
-                                                                    "childs": [
-                                                                        {
-                                                                            "childs": [
+                                                                                {
+                                                                                    "childs": [
+                                                                                        "INT"
+                                                                                    ],
+                                                                                    "name": "type_specifier"
+                                                                                },
                                                                                 {
                                                                                     "childs": [
                                                                                         {
                                                                                             "childs": [
                                                                                                 "IDENTIFIER"
                                                                                             ],
-                                                                                            "name": "direct_declarator"
+                                                                                            "name": "type_specifier"
                                                                                         }
                                                                                     ],
-                                                                                    "name": "declarator"
+                                                                                    "name": "specifier_qualifier_list"
                                                                                 }
                                                                             ],
-                                                                            "name": "struct_declarator"
+                                                                            "name": "specifier_qualifier_list"
                                                                         }
                                                                     ],
-                                                                    "name": "struct_declarator_list"
-                                                                },
-                                                                ";"
-                                                            ],
-                                                            "name": "struct_declaration"
-                                                        },
-                                                        {
-                                                            "childs": [
-                                                                {
-                                                                    "childs": [
-                                                                        {
-                                                                            "childs": [
-                                                                                "FLOAT"
-                                                                            ],
-                                                                            "name": "type_specifier"
-                                                                        }
-                                                                    ],
-                                                                    "name": "specifier_qualifier_list"
-                                                                },
-                                                                {
-                                                                    "childs": [
-                                                                        {
-                                                                            "childs": [
-                                                                                {
-                                                                                    "childs": [
-                                                                                        {
-                                                                                            "childs": [
-                                                                                                "IDENTIFIER"
-                                                                                            ],
-                                                                                            "name": "direct_declarator"
-                                                                                        }
-                                                                                    ],
-                                                                                    "name": "declarator"
-                                                                                }
-                                                                            ],
-                                                                            "name": "struct_declarator"
-                                                                        }
-                                                                    ],
-                                                                    "name": "struct_declarator_list"
+                                                                    "name": "type_name"
                                                                 },
                                                                 ";"
                                                             ],
@@ -104,28 +61,50 @@
                                                                             "childs": [
                                                                                 {
                                                                                     "childs": [
+                                                                                        "FLOAT"
+                                                                                    ],
+                                                                                    "name": "type_specifier"
+                                                                                },
+                                                                                {
+                                                                                    "childs": [
                                                                                         {
                                                                                             "childs": [
-                                                                                                "STRUCT"
+                                                                                                "IDENTIFIER"
                                                                                             ],
-                                                                                            "name": "struct_or_union"
-                                                                                        },
-                                                                                        "{",
+                                                                                            "name": "type_specifier"
+                                                                                        }
+                                                                                    ],
+                                                                                    "name": "specifier_qualifier_list"
+                                                                                }
+                                                                            ],
+                                                                            "name": "specifier_qualifier_list"
+                                                                        }
+                                                                    ],
+                                                                    "name": "type_name"
+                                                                },
+                                                                ";"
+                                                            ],
+                                                            "name": "struct_declaration"
+                                                        },
+                                                        {
+                                                            "childs": [
+                                                                {
+                                                                    "childs": [
+                                                                        {
+                                                                            "childs": [
+                                                                                {
+                                                                                    "childs": [
                                                                                         {
                                                                                             "childs": [
                                                                                                 {
                                                                                                     "childs": [
-                                                                                                        {
-                                                                                                            "childs": [
-                                                                                                                {
-                                                                                                                    "childs": [
-                                                                                                                        "FLOAT"
-                                                                                                                    ],
-                                                                                                                    "name": "type_specifier"
-                                                                                                                }
-                                                                                                            ],
-                                                                                                            "name": "specifier_qualifier_list"
-                                                                                                        },
+                                                                                                        "STRUCT"
+                                                                                                    ],
+                                                                                                    "name": "struct_or_union"
+                                                                                                },
+                                                                                                "{",
+                                                                                                {
+                                                                                                    "childs": [
                                                                                                         {
                                                                                                             "childs": [
                                                                                                                 {
@@ -134,56 +113,57 @@
                                                                                                                             "childs": [
                                                                                                                                 {
                                                                                                                                     "childs": [
-                                                                                                                                        "IDENTIFIER"
+                                                                                                                                        "FLOAT"
                                                                                                                                     ],
-                                                                                                                                    "name": "direct_declarator"
+                                                                                                                                    "name": "type_specifier"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                    "childs": [
+                                                                                                                                        {
+                                                                                                                                            "childs": [
+                                                                                                                                                "IDENTIFIER"
+                                                                                                                                            ],
+                                                                                                                                            "name": "type_specifier"
+                                                                                                                                        }
+                                                                                                                                    ],
+                                                                                                                                    "name": "specifier_qualifier_list"
                                                                                                                                 }
                                                                                                                             ],
-                                                                                                                            "name": "declarator"
+                                                                                                                            "name": "specifier_qualifier_list"
                                                                                                                         }
                                                                                                                     ],
-                                                                                                                    "name": "struct_declarator"
-                                                                                                                }
+                                                                                                                    "name": "type_name"
+                                                                                                                },
+                                                                                                                ";"
                                                                                                             ],
-                                                                                                            "name": "struct_declarator_list"
-                                                                                                        },
-                                                                                                        ";"
+                                                                                                            "name": "struct_declaration"
+                                                                                                        }
                                                                                                     ],
-                                                                                                    "name": "struct_declaration"
-                                                                                                }
+                                                                                                    "name": "struct_declaration_list"
+                                                                                                },
+                                                                                                "}"
                                                                                             ],
-                                                                                            "name": "struct_declaration_list"
-                                                                                        },
-                                                                                        "}"
+                                                                                            "name": "struct_or_union_specifier"
+                                                                                        }
                                                                                     ],
-                                                                                    "name": "struct_or_union_specifier"
-                                                                                }
-                                                                            ],
-                                                                            "name": "type_specifier"
-                                                                        }
-                                                                    ],
-                                                                    "name": "specifier_qualifier_list"
-                                                                },
-                                                                {
-                                                                    "childs": [
-                                                                        {
-                                                                            "childs": [
+                                                                                    "name": "type_specifier"
+                                                                                },
                                                                                 {
                                                                                     "childs": [
                                                                                         {
                                                                                             "childs": [
                                                                                                 "IDENTIFIER"
                                                                                             ],
-                                                                                            "name": "direct_declarator"
+                                                                                            "name": "type_specifier"
                                                                                         }
                                                                                     ],
-                                                                                    "name": "declarator"
+                                                                                    "name": "specifier_qualifier_list"
                                                                                 }
                                                                             ],
-                                                                            "name": "struct_declarator"
+                                                                            "name": "specifier_qualifier_list"
                                                                         }
                                                                     ],
-                                                                    "name": "struct_declarator_list"
+                                                                    "name": "type_name"
                                                                 },
                                                                 ";"
                                                             ],
