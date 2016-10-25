@@ -14,7 +14,7 @@ class Position:
     def next(self):
         if self.position < len(self.text):
             if self.text[self.position] == '\n':
-                self.column = 0
+                self.column = 1
                 self.line += 1
             self.position += 1
             self.column += 1
@@ -24,6 +24,20 @@ class Position:
     def inc(self, size):
         for i in range(0, size):
             self.next()
+
+    def back(self):
+        if self.position > 0:
+            self.position -= 1
+            self.column -= 1
+            if self.text[self.position] == '\n':
+                self.line -= 1
+                self.column = 0
+        else:
+            raise Exception("Bad position")
+
+    def dec(self, size):
+        for i in range(0, size):
+            self.back()
 
     def isEnd(self):
         return self.position >= len(self.text)
@@ -37,7 +51,7 @@ class Position:
         return self.text[self.position: end.position]
 
     def getStringForDebug(self):
-        return self.text[self.position:]
+        return self.text[self.position: self.position + 100]
 
     # Check is substring beginning from self.ptr match str
     def match(self, str2):
@@ -193,6 +207,7 @@ class Lexer:
             if self.parseFloat(): continue
             if self.parseInt(): continue
             if self.parseString(): continue
+            if self.parseSlashNewline(): continue
 
             print("Unknown token '{}'".format(self.ptr.getStringForDebug()))
             raise Exception("Unknown token")
@@ -250,7 +265,7 @@ class Lexer:
 
         def parselLllLL(ptr):
             if ptr.match('ll') or ptr.match('LL'):
-                ptr.next(2)
+                ptr.inc(2)
                 return True
             if ptr.getChar() in 'lL':
                 ptr.next()
@@ -415,7 +430,7 @@ class Lexer:
 
     # CP?'(\\.|[^\\'])+'
     # I_CONSTANT
-    # regexp changed becouse of too much complexity
+    # regexp changed because of too much complexity
     # this regexp can accept char constants with errors, but who cares?
     def parseInt4(self, end):
         self.parseProb(self.parseCP, end)
@@ -423,6 +438,12 @@ class Lexer:
             return False
         end.next()
         while end.getChar() != '\'':
+            if end.match("\\\\"):
+                end.inc(2)
+                continue
+            if end.match("\\'"):
+                end.inc(2)
+                continue
             end.next()
         end.next()
         return True
@@ -531,6 +552,9 @@ class Lexer:
             return False
         end.next()
         while True:
+            if end.match('\\\\'):
+                end.inc(2)
+                continue
             if end.match('\\"'):
                 end.inc(2)
                 continue
@@ -558,7 +582,8 @@ class Lexer:
 
     def parsePreprocessor(self):
         end = copy.copy(self.ptr)
-        if end.getChar() == '#' and (len(self.lst) == 0 or (len(self.lst) > 0 and self.lst[-1].getType() == 'NEWLINE')):
+        #and (len(self.lst) == 0 or (len(self.lst) > 0 and self.lst[-1].getType() == 'NEWLINE'))
+        if end.getChar() == '#':
             while True:
                 if end.match('\\\n'):
                     end.inc(2)
@@ -597,19 +622,39 @@ class Lexer:
             return True
         return False
 
+    def parseSlashNewline(self):
+        if self.ptr.match('\\\n'):
+            self.ptr.inc(2)
+            return True
+        return False
+
     def pushLexem(self, name, representation):
         #print("Found lexem {} '{}' '{}'".format(self.ptr, name, representation))
         self.ptr.inc(len(representation))
-        self.lst.append(Lexem(self.ptr, representation, name))
+
+        position = copy.copy(self.ptr)
+        position.dec(len(representation))
+
+        self.lst.append(Lexem(position, representation, name))
         if self.LEXEM is None:
             self.LEXEM = self.lst[0]
 
-    def get(self):
+    def get(self, idx=0):
+        if idx !=0:
+            self.pushState()
         if self.current_lexem_id == -1:
             self.next()
-        if self.current_lexem_id >= len(self.lst):
-            return Lexem(self.ptr, 'EOF', 'EOF')
-        return self.lst[self.current_lexem_id]
+        if idx != 0:
+            for i in range(0, idx):
+                self.next()
+        lexem = Lexem(self.ptr, 'EOF', 'EOF')
+        if self.current_lexem_id < len(self.lst):
+            lexem = self.lst[self.current_lexem_id]
+
+        if idx != 0:
+            self.popState()
+
+        return lexem
 
     def next(self):
         self.current_lexem_id += 1
@@ -626,6 +671,9 @@ class Lexer:
 
     def pushState(self):
         self.states.append({'ptr': self.current_lexem_id})
+
+    def isEnd(self):
+        return self.current_lexem_id >= len(self.lst)
 
     def popState(self):
         state = self.states[-1]
