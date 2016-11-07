@@ -69,7 +69,6 @@ class Node():
     def concat(self, el):
         return self.append(el, True)
 
-
     def skip(self, el):
         if type(el) is tuple and len(el) == 2 and type(el[1]) is bool:
             return el[1]

@@ -79,16 +79,20 @@ class Analyzer:
         if node.append(self.try2(self.parse_declaration)):
             return node
 
-        return self.skipFuncDef()
-        #raise AnalyzerException('external_declaration', "ERR at pos {}".format(self.lexer.get().position))
+        #return self.skipFuncDef()
+        raise AnalyzerException('external_declaration', "ERR at pos {}".format(self.lexer.get().position))
 
     def skipFuncDef(self):
         node = Node.create('ERROR')
 
         begin = self.lexer.get()
-        while self.lexer.get().getType() != '{' and self.lexer.get().getType() != ';' and not self.lexer.isEnd():
+        while self.lexer.get().getType() != '{' and self.lexer.get().getType() != ';' and self.lexer.get().getType() != '}' and not self.lexer.isEnd():
             #node.append(self.lexer.get())
             self.lexer.next()
+
+        if self.lexer.get().getType() == '}':
+            return node
+
         if self.lexer.get().getType() == ';':
             self.lexer.next()
             return node
@@ -1415,5 +1419,26 @@ class Analyzer:
             node.concat(result)
 
 
+def normalizeAST(node):
+    if type(node) is Node.Node:
+        if node.count() > 1:
+            n = Node.create(node.name)
+            for ch in node:
+                n.append(normalizeAST(ch))
+            return n
+        elif node.count() == 1:
+            return normalizeAST(node.get(0))
+    elif type(node) is lexer.Lexem:
+        return node
+    else:
+        raise Exception('unknown type of node {}'.format(type(node)))
+
+
+def generateFile(node):
+    pass
+    #if type(node) is Node.Node:
+    #    for ch in node:
+    #        generateFile(ch)
+    #elif type(node) is lexer.Lexem:
 
 

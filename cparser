@@ -17,23 +17,18 @@ def main():
     print("parsing {}".format(args.input))
 
     f = open(args.input, "r")
-
     start = time.time()
-    #try:
-    l = lexer.Lexer(f.read())
 
+    l = lexer.Lexer(f.read())
     a = analyzer.Analyzer(l)
 
     res = a.parse()
     end = time.time()
-    debug.printNodeWithSkip(res)
-    #dropResult(res, args.input)
+    res = analyzer.normalizeAST(res)
+    debug.printNode(res)
 
     print("Time passed {}".format(end - start))
-    #except:
-    #    print("Error occurred during parsing {}".format(args.input))
-    #    sys.exit(1)
-    
+
 
 
 if __name__ == "__main__":
