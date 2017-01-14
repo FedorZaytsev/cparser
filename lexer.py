@@ -74,10 +74,12 @@ class Position:
 
 
 class Lexem:
-    def __init__(self, position, representation, t):
+    def __init__(self, position, representation, t, idx):
         self.position = position
         self.representation = representation
         self.type = t
+        self.idx = idx
+        self.parent = None
 
     def getType(self):
         return self.type
@@ -188,6 +190,10 @@ class Lexer:
         '__func__': 'FUNC_NAME',
     }
 
+    defined_lexems = list(operators.values()) + list(keywords.values()) + \
+                     ['IDENTIFIER', 'I_CONSTANT', 'F_CONSTANT', 'STRING_LITERAL', 'COMMENT', 'NEWLINE',
+                      'SPACE', 'TAB', 'PREPROCESSOR', 'EOF', 'ERROR', 'UNKNOWN']
+
     def __init__(self, data):
         assert (type(data) is str)
         self.data = data
@@ -196,6 +202,7 @@ class Lexer:
         self.LEXEM = None
         self.lst = []
         self.states = []
+
 
         #order is important
         while not self.ptr.isEnd():
@@ -210,6 +217,15 @@ class Lexer:
             if self.parseSlashNewline(): continue
 
             print("Unknown token '{}'".format(self.ptr.getStringForDebug()))
+            if self.parsePreprocessor(): continue
+            if self.parseWhitespace(): continue
+            if self.parseComment(): continue
+            if self.parseOperators(): continue
+            if self.parseIdent(): continue
+            if self.parseFloat(): continue
+            if self.parseInt(): continue
+            if self.parseString(): continue
+            if self.parseSlashNewline(): continue
             raise Exception("Unknown token")
 
     # [0-7]
@@ -546,6 +562,7 @@ class Lexer:
 
     # L?\"(\\.|[^\\"])*\"
     def parseString(self):
+        self.TEMP = self.lst[-20:]
         end = copy.copy(self.ptr)
         self.parseL(end)
         if end.getChar() != '"':
@@ -593,8 +610,7 @@ class Lexer:
                     return True
                 if end.getChar() == '\n':
                     # CHECK THIS POINT
-                    end.next()
-                    self.ptr = end
+                    self.pushLexem("PREPROCESSOR", self.ptr.getString(end))
                     return True
                 end.next()
         return False
@@ -604,8 +620,12 @@ class Lexer:
             self.pushLexem('NEWLINE', self.ptr.getChar())
             return True
 
-        if self.ptr.getChar().isspace():
+        if self.ptr.getChar() == ' ':
             self.pushLexem('SPACE', self.ptr.getChar())
+            return True
+
+        if self.ptr.getChar() == '\t':
+            self.pushLexem('TAB', self.ptr.getChar())
             return True
         return False
 
@@ -630,24 +650,28 @@ class Lexer:
 
     def pushLexem(self, name, representation):
         #print("Found lexem {} '{}' '{}'".format(self.ptr, name, representation))
-        self.ptr.inc(len(representation))
+        #self.ptr.inc(len(representation))
 
         position = copy.copy(self.ptr)
-        position.dec(len(representation))
+        #position.dec(len(representation))
+        self.ptr.inc(len(representation))
 
-        self.lst.append(Lexem(position, representation, name))
+        self.lst.append(Lexem(position, representation, name, len(self.lst)))
         if self.LEXEM is None:
             self.LEXEM = self.lst[0]
 
-    def get(self, idx=0):
+    def get(self, idx=0, skip=True):
         if idx !=0:
             self.pushState()
         if self.current_lexem_id == -1:
             self.next()
         if idx != 0:
             for i in range(0, idx):
-                self.next()
-        lexem = Lexem(self.ptr, 'EOF', 'EOF')
+                self.next(skip)
+            for i in range(0, -idx):
+                self.prev(skip)
+
+        lexem = Lexem(self.ptr, 'EOF', 'EOF', len(self.lst))
         if self.current_lexem_id < len(self.lst):
             lexem = self.lst[self.current_lexem_id]
 
@@ -656,15 +680,24 @@ class Lexer:
 
         return lexem
 
-    def next(self):
+    def next(self, skip=True):
         self.current_lexem_id += 1
-        while self.current_lexem_id < len(self.lst) and (self.lst[self.current_lexem_id].getType() == "NEWLINE" or
-                                                         self.lst[self.current_lexem_id].getType() == "SPACE" or
-                                                         self.lst[self.current_lexem_id].getType() == "COMMENT"
-                                                         ):
+        skipLexems = ['NEWLINE', 'SPACE', 'TAB', 'COMMENT', 'PREPROCESSOR']
+        while self.current_lexem_id < len(self.lst) and skip and self.lst[self.current_lexem_id].getType() in skipLexems:
             self.current_lexem_id += 1
 
         if self.current_lexem_id < len(self.lst):
+            self.LEXEM = self.lst[self.current_lexem_id]
+        else:
+            self.LEXEM = None
+
+    def prev(self, skip=True):
+        self.current_lexem_id -= 1
+        skipLexems = ['NEWLINE', 'SPACE', 'TAB', 'COMMENT', 'PREPROCESSOR']
+        while self.current_lexem_id >= 0 and skip and self.lst[self.current_lexem_id].getType() in skipLexems:
+            self.current_lexem_id -= 1
+
+        if self.current_lexem_id >= 0:
             self.LEXEM = self.lst[self.current_lexem_id]
         else:
             self.LEXEM = None
@@ -694,10 +727,14 @@ class Lexer:
         ptr = self.current_lexem_id + 1
         while ptr < len(self.lst):
             lexem = self.lst[ptr]
-            if lexem.getType() == 'SPACE' or lexem.getType() == 'NEWLINE':
+            if lexem.getType() == 'SPACE' or lexem.getType() == 'TAB' or lexem.getType() == 'NEWLINE':
                 ptr += 1
                 continue
             if lexem.getType() == 'COMMENT':
+                lst.append(lexem)
+                ptr += 1
+                continue
+            if lexem.getType() == 'PREPROCESSOR':
                 lst.append(lexem)
                 ptr += 1
                 continue
@@ -705,4 +742,22 @@ class Lexer:
             break
 
         return lst
+
+    def getByIdx(self, idx, offset=0, skip=True):
+        if offset != 0:
+            self.pushState()
+
+        self.current_lexem_id = idx
+        lexem = self.get(offset, skip)
+
+        if offset != 0:
+            self.popState()
+
+        return lexem
+
+    @staticmethod
+    def getLexemId(name):
+        return Lexer.defined_lexems.index(name)
+
+
 

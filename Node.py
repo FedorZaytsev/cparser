@@ -1,4 +1,5 @@
 import analyzer
+import lexer
 
 class NodeChildIterator():
     def __init__(self, node):
@@ -23,6 +24,7 @@ class Node():
     def __init__(self, name):
         self.name = name
         self.children = []
+        self.parent = None
 
     def __iter__(self):
         return NodeChildIterator(self)
@@ -58,10 +60,13 @@ class Node():
             if value:
                 if concate:
                     for e in value:
+                        e.parent = self
                         self.children.append(e)
                 else:
+                    value.parent = self
                     self.children.append(value)
             for e in comments:
+                e.parent = self
                 self.children.append(e)
 
         return flag
@@ -87,7 +92,7 @@ class Node():
         return self
 
     def __str__(self):
-        s = self.name + '(' + ', '.join( str(child) for child in self.children ) + ')'
+        s = self.name + '(' + ', '.join(str(child) for child in self.children) + ')'
         return s
 
 

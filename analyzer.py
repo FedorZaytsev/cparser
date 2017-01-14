@@ -11,14 +11,101 @@ class AnalyzerException(Exception):
 
 
 class Analyzer:
+
+
+    rules = [
+        'translation_unit',
+        'external_declaration',
+        'ERROR',
+        'function_definition',
+        'declaration_specifiers',
+        'storage_class_specifier',
+        'type_specifier',
+        'type_qualifier',
+        'function_specifier',
+        'alignment_specifier',
+        'type_name',
+        'specifier_qualifier_list',
+        'abstract_declarator',
+        'pointer',
+        'type_qualifier_list',
+        'direct_abstract_declarator',
+        'parameter_type_list',
+        'parameter_list',
+        'parameter_declaration',
+        'declarator',
+        'direct_declarator',
+        'assignment_expression',
+        'conditional_expression',
+        'logical_or_expression',
+        'logical_and_expression',
+        'inclusive_or_expression',
+        'exclusive_or_expression',
+        'and_expression',
+        'equality_expression',
+        'relational_expression',
+        'shift_expression',
+        'additive_expression',
+        'multiplicative_expression',
+        'cast_expression',
+        'unary_expression',
+        'unary_operator',
+        'postfix_expression',
+        'argument_expression_list',
+        'expression',
+        'initializer_list',
+        'designation',
+        'designator_list',
+        'designator',
+        'constant_expression',
+        'initializer',
+        'primary_expression',
+        'constant',
+        'string',
+        'generic_assoc_list',
+        'generic_association',
+        'assignment_operator',
+        'identifier_list',
+        'atomic_type_specifier',
+        'struct_or_union_specifier',
+        'struct_or_union',
+        'struct_declaration_list',
+        'struct_declaration',
+        'static_assert_declaration',
+        'struct_declarator_list',
+        'struct_declarator',
+        'enum_specifier',
+        'enumerator_list',
+        'enumerator',
+        'enumeration_constant',
+        'compound_statement',
+        'block_item_list',
+        'block_item',
+        'declaration',
+        'init_declarator_list',
+        'init_declarator',
+        'statement',
+        'labeled_statement',
+        'expression_statement',
+        'selection_statement',
+        'iteration_statement',
+        'jump_statement',
+        'declaration_list',
+        'ERROR',
+        'UNKNOWN'
+    ]
+
     def __init__(self, lexer):
         self.lexer = lexer
         self.grammar = Cgrammar.CGrammar
+        self.errors = []
 
     def parse(self):
         return self.parse_translation_unit()
 
-    def try2(self, func, args=[]):
+    def try2(self, func, args=None):
+        if args is None:
+            args = []
         self.lexer.pushState()
         lnode = None
         try:
@@ -79,33 +166,40 @@ class Analyzer:
         if node.append(self.try2(self.parse_declaration)):
             return node
 
-        #return self.skipFuncDef()
-        raise AnalyzerException('external_declaration', "ERR at pos {}".format(self.lexer.get().position))
+        return self.skipFuncDef()
+        #raise AnalyzerException('external_declaration', "ERR at pos {}".format(self.lexer.get().position))
 
     def skipFuncDef(self):
+
+        def skip():
+            while self.lexer.get().getType() != '{' and self.lexer.get().getType() != '}' and self.lexer.get().getType() != ';' and not self.lexer.isEnd():
+                self.lexer.next()
+
+            if self.lexer.get().getType() == '}':
+                return
+
+            if self.lexer.get().getType() == ';':
+                self.lexer.next()
+                return
+
+            self.lexer.next()
+            count = 1
+            while count > 0 and not self.lexer.isEnd():
+                lexem = self.lexer.get()
+                if lexem.getType() == '{':
+                    count += 1
+                if lexem.getType() == '}':
+                    count -= 1
+                self.lexer.next()
+
         node = Node.create('ERROR')
 
         begin = self.lexer.get()
-        while self.lexer.get().getType() != '{' and self.lexer.get().getType() != ';' and self.lexer.get().getType() != '}' and not self.lexer.isEnd():
-            #node.append(self.lexer.get())
-            self.lexer.next()
+        skip()
+        end = self.lexer.get()
 
-        if self.lexer.get().getType() == '}':
-            return node
-
-        if self.lexer.get().getType() == ';':
-            self.lexer.next()
-            return node
-        self.lexer.next()
-        count = 1
-        while count > 0 and not self.lexer.isEnd():
-            lexem = self.lexer.get()
-            #node.append(lexem)
-            if lexem.getType() == '{':
-                count += 1
-            if lexem.getType() == '}':
-                count -= 1
-            self.lexer.next()
+        node.append(lexer.Lexem(begin.position, begin.position.getString(end.position), 'ERROR', -1))
+        self.errors.append(node)
 
         return node
 
@@ -342,52 +436,52 @@ class Analyzer:
         if node.append(self.try2(self.checkLexem, [rule_name, ['(']])):
 
             if node.append(self.try2(self.checkLexem, [rule_name, [')']])):
-                node.append(self.parse_direct_abstract_declarator_lr(node))
+                self.parse_direct_abstract_declarator_lr(node)
                 return node
 
             if node.append(self.try2(self.parse_parameter_type_list)):
                 node.append(self.checkLexem(rule_name, [')']))
-                node.append(self.parse_direct_abstract_declarator_lr(node))
+                self.parse_direct_abstract_declarator_lr(node)
                 return node
 
         if node.append(self.try2(self.checkLexem, [rule_name, ['[']])):
 
             if node.append(self.try2(self.checkLexem, [rule_name, [']']])):
-                node.append(self.parse_direct_abstract_declarator_lr(node))
+                self.parse_direct_abstract_declarator_lr(node)
                 return node
 
             if node.append(self.try2(self.checkLexem, [rule_name, ['*']])):
                 node.append(self.checkLexem(rule_name, [']']))
-                node.append(self.parse_direct_abstract_declarator_lr(node))
+                self.parse_direct_abstract_declarator_lr(node)
                 return node
 
             if node.append(self.try2(self.checkLexem, [rule_name, ['STATIC']])):
                 node.append(self.try2(self.parse_type_qualifier_list))
                 node.append(self.parse_assignment_expression())
                 node.append(self.checkLexem(rule_name, [']']))
-                node.append(self.parse_direct_abstract_declarator_lr(node))
+                self.parse_direct_abstract_declarator_lr(node)
                 return node
 
             if node.append(self.try2(self.parse_type_qualifier_list)):
 
                 if node.append(self.try2(self.parse_assignment_expression)):
                     node.append(self.checkLexem(rule_name, [']']))
-                    node.append(self.parse_direct_abstract_declarator_lr(node))
+                    self.parse_direct_abstract_declarator_lr(node)
                     return node
 
                 if node.append(self.try2(self.checkLexem, [rule_name, ['STATIC']])):
                     node.append(self.parse_assignment_expression())
                     node.append(self.checkLexem(rule_name, [']']))
-                    node.append(self.parse_direct_abstract_declarator_lr(node))
+                    self.parse_direct_abstract_declarator_lr(node)
                     return node
 
                 if node.append(self.try2(self.checkLexem, [rule_name, [']']])):
-                    node.append(self.parse_direct_abstract_declarator_lr(node))
+                    self.parse_direct_abstract_declarator_lr(node)
                     return node
 
             if node.append(self.try2(self.parse_assignment_expression)):
                 node.append(self.checkLexem(rule_name, [']']))
-                node.append(self.parse_direct_abstract_declarator_lr(node))
+                self.parse_direct_abstract_declarator_lr(node)
                 return node
 
         return node
@@ -1395,39 +1489,47 @@ class Analyzer:
 
         return begin.position, begin.position.getString(self.lexer.get().position)
 
-    def restore(self, node, func, args=[]):
+    def restore(self, node, func, args=None):
+        if args is None:
+            args = []
         result = None
         try:
             result = func(*args)
         except AnalyzerException as e:
+            raise AnalyzerException('', '')
             position, skippedText = self.processFollow(e.rule)
             if position != self.lexer.get().position:
                 print("ERROR: cannot parse {} in rule {} at pos {}".format(skippedText, e.rule, position))
                 result = Node.create('ERROR')
-                result.append(lexer.Lexem(position, skippedText, 'ERROR'))
+                result.append(lexer.Lexem(position, skippedText, 'ERROR', -1, -1))
         finally:
             node.append(result)
 
-    def restorec(self, node, func, args=[]):
+    def restorec(self, node, func, args=None):
+        if args is None:
+            args = []
         result = None
         try:
             result = func(*args)
         except AnalyzerException as e:
             print("ERROR: {}".format(e))
-            result = Node.create('err')
+            result = Node.create('ERROR')
         finally:
             node.concat(result)
 
+    def getRuleId(self, name):
+        return Analyzer.rules.index(name)
 
-def normalizeAST(node):
+
+def normalizeAST(node, frun=True):
     if type(node) is Node.Node:
-        if node.count() > 1:
+        if node.count() > 1 or frun:
             n = Node.create(node.name)
             for ch in node:
-                n.append(normalizeAST(ch))
+                n.append(normalizeAST(ch, False))
             return n
         elif node.count() == 1:
-            return normalizeAST(node.get(0))
+            return normalizeAST(node.get(0), False)
     elif type(node) is lexer.Lexem:
         return node
     else:
