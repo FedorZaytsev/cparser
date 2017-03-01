@@ -17,8 +17,8 @@ def printNode1(node, padding):
         return str
 
 
-def printNode(node):
-    print(printNode1(node, ''))
+def AST2String(node):
+     return printNode1(node, '')
 
 
 def printNodeWithSkip1(node, padding):
@@ -39,8 +39,8 @@ def printNodeWithSkip1(node, padding):
         return str
 
 
-def printNodeWithSkip(node):
-    print(printNodeWithSkip1(node, ''))
+def AST2StringSkip(node):
+    return printNodeWithSkip1(node, '')
 
 
 def Node2Json(node):

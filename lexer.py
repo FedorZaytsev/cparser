@@ -650,10 +650,8 @@ class Lexer:
 
     def pushLexem(self, name, representation):
         #print("Found lexem {} '{}' '{}'".format(self.ptr, name, representation))
-        #self.ptr.inc(len(representation))
 
         position = copy.copy(self.ptr)
-        #position.dec(len(representation))
         self.ptr.inc(len(representation))
 
         self.lst.append(Lexem(position, representation, name, len(self.lst)))

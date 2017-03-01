@@ -25,7 +25,7 @@ def main():
     res = a.parse()
     end = time.time()
     res = analyzer.normalizeAST(res)
-    debug.printNode(res)
+    print(debug.AST2String(res))
 
     print("Time passed {}".format(end - start))
 

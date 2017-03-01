@@ -1,0 +1,23 @@
+{
+    "childs": [
+        {
+            "childs": [
+                "INT",
+                "IDENTIFIER",
+                "(",
+                ")",
+                "VOID",
+                "IDENTIFIER",
+                "*",
+                "IDENTIFIER",
+                ";",
+                "RETURN",
+                "I_CONSTANT",
+                ";",
+                "}"
+            ],
+            "name": "ERROR"
+        }
+    ],
+    "name": "translation_unit"
+}
