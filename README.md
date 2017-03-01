@@ -21,7 +21,7 @@ python3 ./main.py ./tests/bin2hex_c
 * lexer.py file contains lexer which transforms C code as string to list of lexer.Lexem objects.
 * analyzer.py file contains Analyzer object which transform list of lexer.Lexem to AST tree. analyzer.Analyzer object takes lexer.Lexer in constructor. To generate tree call parse() method.
 * Node.py file contains Node object which is element in AST tree.
-* To print full AST tree with all nodes call debug.printNode( ast_tree ). To skip garbage nodes call debug.printNodeWithSkip( ast_tree )
+* To print full AST tree with all nodes call debug.AST2String( ast_tree ). To skip garbage nodes call debug.AST2StringSkip( ast_tree )
 
 
 ##TODO
