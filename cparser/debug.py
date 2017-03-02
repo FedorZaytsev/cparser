@@ -1,6 +1,8 @@
-import Node
-import lexer
 import json
+
+from . import Node
+from . import lexer
+
 
 def printNode1(node, padding):
     str = ''

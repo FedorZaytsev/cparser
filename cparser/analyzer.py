@@ -1,6 +1,6 @@
-import Cgrammar
-import Node
-import lexer
+from . import Cgrammar
+from . import Node
+from . import lexer
 
 
 class AnalyzerException(Exception):

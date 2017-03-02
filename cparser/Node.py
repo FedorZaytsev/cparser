@@ -1,5 +1,5 @@
-import analyzer
-import lexer
+from cparser import analyzer
+
 
 class NodeChildIterator():
     def __init__(self, node):
@@ -15,7 +15,7 @@ class NodeChildIterator():
 
 
 def create(name, node=None):
-    if not node is None:
+    if node is not None:
         return node
     return Node(name)
 

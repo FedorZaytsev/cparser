@@ -1,9 +1,9 @@
-import lexer
-import analyzer
 import argparse
-import debug
-import sys
 import time
+
+
+from cparser import analyzer, lexer, debug
+
 
 def dropResult(res, filename):
     with open(filename+'.a','w') as f:
