@@ -1,15 +1,15 @@
-#PyCParser
+# PyCParser
 
-###Copyright (c) 2016 Fedor Zaytsev
+### Copyright (c) 2016 Fedor Zaytsev
 
-##About
+## About
 The aim of this project is to create parser for C language. There are several features of this parser:
 
 * Parser saves all comments. Each comment appends to the parent node.
 * Uses grammar for C11 (see grammar.txt for more)
 * Parser skip all preprocessor directives. Unfortunatelly, as a result of this, it do not build symbol table and cannot say is identificator is defined type or not.
 
-##Fast start
+## Fast start
 To test program you can execute following command to generate AST tree for a test file:
 ```
 git clone https://github.com/rusphantom/cparser.git
@@ -17,7 +17,7 @@ cd cparser/
 python3 ./main.py ./tests/bin2hex_c
 ```
 
-##How to use
+## How to use
 To install this lib into pip, use
 ```
 pip3 install .
@@ -30,7 +30,7 @@ pip3 install .
 
 It is easier to check an example how to use this lib in ./main.py
 
-##TODO
+## TODO
 * Use first sets
 * Make documentation
 
